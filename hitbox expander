@@ -1,0 +1,29 @@
+local scaleFactor = 1.7
+local localPlayer = game.Players.LocalPlayer
+
+local function resizeHead(player)
+    player.CharacterAdded:Connect(function(character)
+        local head = character:WaitForChild("Head", 5)
+        if head and head:IsA("BasePart") then
+            head.Size = head.Size * scaleFactor
+        end
+    end)
+end
+
+for _, player in pairs(game.Players:GetPlayers()) do
+    if player ~= localPlayer then
+        resizeHead(player)
+        if player.Character then
+            local head = player.Character:FindFirstChild("Head")
+            if head and head:IsA("BasePart") then
+                head.Size = head.Size * scaleFactor
+            end
+        end
+    end
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+    if player ~= localPlayer then
+        resizeHead(player)
+    end
+end)
