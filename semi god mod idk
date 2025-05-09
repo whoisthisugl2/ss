@@ -1,0 +1,15 @@
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+if humanoid then
+    humanoid.HealthChanged:Connect(function(health)
+        if health <= 15 then
+            local startTime = tick()
+            while tick() - startTime < 10 do
+                humanoid.Health = 100
+                task.wait(0.1)
+            end
+        end
+    end)
+end
