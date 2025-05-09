@@ -1,3 +1,4 @@
+-- INVISIBLE SCRIPT (cam fixed by whoisthisugly the goat)
 getgenv().animpos = 0
 getgenv().underground = -6.50
 
@@ -8,6 +9,7 @@ local mouse = lplr:GetMouse()
 local animation = Instance.new("Animation")
 animation.AnimationId = "http://www.roblox.com/asset/?id=10147821284"
 local danceTrack
+
 mouse.KeyDown:Connect(function(key)
     if key == string.lower("x") then
         pcall(function()
@@ -24,19 +26,29 @@ mouse.KeyDown:Connect(function(key)
         end)
     end
 end)
+
 local dysenc = {}
 local temp = 1
+
 runserv.Heartbeat:Connect(function()
     temp = temp + 1
-    if enabled and lplr.Character and lplr.Character.HumanoidRootPart then
+    if enabled and lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart") then
         danceTrack.TimePosition = animpos
         dysenc[1] = lplr.Character.HumanoidRootPart.CFrame
         dysenc[2] = lplr.Character.HumanoidRootPart.AssemblyLinearVelocity
-        local SpoofThis = lplr.Character.HumanoidRootPart.CFrame
-        SpoofThis = (SpoofThis + Vector3.new(0, getgenv().underground, 0)) * CFrame.Angles(0, 0, math.pi)
-        lplr.Character.HumanoidRootPart.CFrame = SpoofThis
+
+        -- Yer altı ve görünmezlik
+        local spoof = lplr.Character.HumanoidRootPart.CFrame
+        spoof = (spoof + Vector3.new(0, getgenv().underground, 0)) * CFrame.Angles(0, 0, math.pi)
+        lplr.Character.HumanoidRootPart.CFrame = spoof
+
+        -- Kamera yukarıda tutulur
+        local cam = workspace.CurrentCamera
+        cam.CFrame = CFrame.new(lplr.Character.Head.Position + Vector3.new(0, 2, 0))
+
         runserv.RenderStepped:Wait()
-        if lplr.Character and lplr.Character.HumanoidRootPart then
+
+        if lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart") then
             lplr.Character.HumanoidRootPart.CFrame = dysenc[1]
             lplr.Character.HumanoidRootPart.AssemblyLinearVelocity = dysenc[2]
         end
