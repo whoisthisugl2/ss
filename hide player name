@@ -1,0 +1,30 @@
+getgenv().name = "ugly"
+
+local Plr = game.Players.LocalPlayer
+
+-- Function to replace player name with custom string in TextLabels
+local function replacePlayerNameInText(Value)
+    if Value.ClassName == "TextLabel" then
+        local has = string.find(Value.Text, Plr.Name)
+        if has then
+            local str = Value.Text:gsub(Plr.Name, name)
+            Value.Text = str
+        end
+        
+        -- Update text on property change
+        Value:GetPropertyChangedSignal("Text"):Connect(function()
+            local str = Value.Text:gsub(Plr.Name, name)
+            Value.Text = str
+        end)
+    end
+end
+
+-- Iterate through existing descendants
+for _, Value in next, game:GetDescendants() do
+    replacePlayerNameInText(Value)
+end
+
+-- Listen for newly added descendants
+game.DescendantAdded:Connect(function(Value)
+    replacePlayerNameInText(Value)
+end)
