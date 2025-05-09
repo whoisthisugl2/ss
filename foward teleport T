@@ -1,0 +1,14 @@
+    local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.T then
+        local character = LocalPlayer.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local rootPart = character.HumanoidRootPart
+            local forwardVector = rootPart.CFrame.LookVector * 4
+            rootPart.CFrame = rootPart.CFrame + forwardVector
+        end
+    end
+end)
