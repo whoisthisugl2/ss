@@ -1,0 +1,38 @@
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local userInputService = game:GetService("UserInputService")
+local isFlying = false
+
+local flySpeed = 15
+
+local function startFlying()
+    isFlying = true
+end
+
+local function stopFlying()
+    isFlying = false
+end
+
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        startFlying()
+    end
+end)
+
+userInputService.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.V then
+        stopFlying()
+    end
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if isFlying then
+        humanoidRootPart.Velocity = Vector3.new(
+            humanoidRootPart.Velocity.X,
+            flySpeed,
+            humanoidRootPart.Velocity.Z
+        )
+    end
+end)
