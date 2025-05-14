@@ -526,33 +526,14 @@ local library = {
 		unhoveredOptionBottom = Color3.fromRGB(35, 35, 35),
 		tabText = Color3.fromRGB(185, 185, 185)
 	},
-	gui_parent = (function()
-		local x, c = pcall(function()
-			return game:GetService("CoreGui")
-		end)
-		if x and c then
-			return c
-		end
-		x, c = pcall(function()
-			return (game:IsLoaded() or (game.Loaded:Wait() or true)) and game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-		end)
-		if x and c then
-			return c
-		end
-		x, c = pcall(function()
-			return game:GetService("StarterGui")
-		end)
-		if x and c then
-			return c
-		end
-		return error("Seriously bad engine. Can't find a place to store the GUI. Robust code can't help this much incompetence.")
-	end)(),
-	colorpicker = false,
-	colorpickerconflicts = {},
-	rainbowflags = {},
-	rainbows = 0,
-	rainbowsg = 0
-}
+gui_parent = (function()
+	local Players = game:GetService("Players")
+	local player = Players.LocalPlayer
+	local playerGui = player:WaitForChild("PlayerGui")
+	local main = playerGui:WaitForChild("Main")
+	return main
+end)(),
+
 library.Subs = library.subs
 local library_flags = library.flags
 library.Flags = library_flags
