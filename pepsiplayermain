@@ -1,29 +1,3 @@
--- Pepsi GUI injection into PlayerGui.Main
-
-repeat wait() until game:IsLoaded()
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-local mainGui = playerGui:WaitForChild("Main")
-
--- Create GUI root
-local pepsi = Instance.new("ScreenGui")
-pepsi.Name = "pepsi"
-pepsi.ResetOnSpawn = false
-pepsi.ZIndexBehavior = Enum.ZIndexBehavior.Global
-
--- Protect GUI if using exploit environment (optional)
-if syn and syn.protect_gui then
-    pcall(function()
-        syn.protect_gui(pepsi)
-    end)
-end
-
--- Parent GUI to PlayerGui.Main instead of CoreGui
-pepsi.Parent = mainGui
-
--- Include the Pepsi Library (original contents from pepsi shit)
--- START OF PEPSI LIBRARY --
 --[[ Pepsi's UI Library
 Better and updated web-based docs are planned in distant future.
 Library v0.36 [
@@ -526,13 +500,22 @@ local library = {
 		unhoveredOptionBottom = Color3.fromRGB(35, 35, 35),
 		tabText = Color3.fromRGB(185, 185, 185)
 	},
-gui_parent = (function()
-	local Players = game:GetService("Players")
-	local player = Players.LocalPlayer
-	local playerGui = player:WaitForChild("PlayerGui")
-	local main = playerGui:WaitForChild("Main")
-	return main
-end)(),
+	gui_parent = (function()
+    local x, c = pcall(function()
+        return game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("Main")
+    end)
+    if x and c then
+        return c
+    end
+
+    return error("Couldn't find the 'Main' GUI object in PlayerGui.")
+end)(),  -- Bu satırın sonundaki virgül burada önemli
+colorpicker = false,
+colorpickerconflicts = {},
+rainbowflags = {},
+rainbows = 0,
+rainbowsg = 0
+}
 
 library.Subs = library.subs
 local library_flags = library.flags
