@@ -499,33 +499,31 @@ local library = {
 		hoveredOptionBottom = Color3.fromRGB(45, 45, 45),
 		unhoveredOptionBottom = Color3.fromRGB(35, 35, 35),
 		tabText = Color3.fromRGB(185, 185, 185)
-gui_parent = (function()
-    local success, gui = pcall(function()
-        local player = game:GetService("Players").LocalPlayer
-        local playerGui = player:WaitForChild("PlayerGui")
+	},
+	gui_parent = (function()
+	local player = game:GetService("Players").LocalPlayer
+	local playerGui = player:WaitForChild("PlayerGui")
 
-        local existing = playerGui:FindFirstChild("Main")
-        if existing then
-            return existing
-        else
-            local newGui = Instance.new("ScreenGui")
-            newGui.Name = "Main"
-            newGui.ResetOnSpawn = false
-            newGui.IgnoreGuiInset = true
-            newGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-            newGui.Parent = playerGui
-            return newGui
-        end
-    end)
-
-    if success and gui then
-        return gui
-    end
-
-    return error("Couldn't create or access 'Main' GUI object in PlayerGui.")
+	local existing = playerGui:FindFirstChild("Main")
+	if existing then
+		return existing
+	else
+		local newGui = Instance.new("ScreenGui")
+		newGui.Name = "Main"
+		newGui.IgnoreGuiInset = true
+		newGui.ResetOnSpawn = false
+		newGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		newGui.Parent = playerGui
+		return newGui
+	end
 end)(),
 
-
+	colorpicker = false,
+	colorpickerconflicts = {},
+	rainbowflags = {},
+	rainbows = 0,
+	rainbowsg = 0
+}
 library.Subs = library.subs
 local library_flags = library.flags
 library.Flags = library_flags
