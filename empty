@@ -387,6 +387,16 @@ if isRebirthOne then
     getgenv().PetFinderSettings = getgenv().PetFinderSettings or {}
     local Settings = getgenv().PetFinderSettings
 
+    -- API Configuration
+    local http_request = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+    if not http_request then
+        warn("[PET FINDER] ERROR: Your executor doesn't support HTTP requests!")
+    end
+    
+    local VPS_URL = "https://joiner-production-f4f0.up.railway.app"
+    local API_SECRET = "zXw7tKAm4vQjaz0cALWtmLM6j6sEBdT71Sml9liC6VQOws4iSwJQSRMfVptDeXxq"
+    local VPS_PLACE_ID = 109983668079237
+
     ServerCacheFileName = "server_cache.json"
     HopSettings = { sortOrder = "Asc", minPlayers = 1 }
     ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
@@ -479,6 +489,54 @@ if isRebirthOne then
             return GetCachedServersList()
         end
         return ServersList
+    end
+
+    -- ===============================
+    -- API Communication
+    -- ===============================
+    local function sendToAPI(brainrotData, serverId, playerCount, maxPlayers)
+        if not http_request then
+            warn("[PET FINDER] Cannot send to API: HTTP request not available")
+            return false
+        end
+        
+        print("📤 [PET FINDER] API'ye veri gönderiliyor - JobID: " .. serverId .. ", Brainrot sayısı: " .. #brainrotData)
+        local success, response = pcall(function()
+            local headers = {
+                ["Authorization"] = "Bearer " .. API_SECRET,
+                ["Content-Type"] = "application/json"
+            }
+            
+            local payload = {
+                brainrots = brainrotData,
+                server_id = serverId,
+                player_count = playerCount,
+                max_players = maxPlayers
+            }
+            
+            local body = HttpService:JSONEncode(payload)
+            
+            local result = http_request({
+                Url = VPS_URL .. "/notify",
+                Method = "POST",
+                Headers = headers,
+                Body = body
+            })
+            
+            if result and result.StatusCode == 200 then
+                print("✅ [PET FINDER] API'ye veri gönderildi - Status: " .. result.StatusCode)
+                return true
+            else
+                print("❌ [PET FINDER] API yanıt hatası - Status: " .. (result and result.StatusCode or "nil"))
+                return false
+            end
+        end)
+        
+        if not success then
+            print("❌ [PET FINDER] API çağrısı hatası: " .. tostring(response))
+        end
+        
+        return success and response
     end
 
     function AttemptServerTeleport()
@@ -727,12 +785,32 @@ if isRebirthOne then
     
     print("[PET FINDER] Starting scan loop...")
     
+    -- Wait for game to fully load before starting
     task.spawn(function()
-        task.wait(2)
-        while true do
+        print("⏳ [PET FINDER] Oyun yükleniyor...")
+        repeat task.wait() until game:IsLoaded()
+        print("⏳ [PET FINDER] Oyuncu karakteri bekleniyor...")
+        repeat task.wait() until Players.LocalPlayer and Players.LocalPlayer.Character
+        print("⏳ [PET FINDER] Plots bekleniyor...")
+        repeat task.wait() until Workspace and Workspace:FindFirstChild("Plots")
+        
+        task.wait(math.random(3, 8) / 10)
+        
+        local scanComplete = false
+        
+        -- Scan task - scans and sends to API
+        task.spawn(function()
+            print("🔍 [PET FINDER] Scan task başlatıldı")
             pcall(function()
-                -- Scan for pets using plot scanning method
+                -- Cache jobID directly
+                local serverId = game.JobId
+                print("📌 [PET FINDER] Mevcut sunucu JobID: " .. serverId)
+                
+                task.wait(0.5)
+                
+                print("🔍 [PET FINDER] Plotlar taranıyor...")
                 local brainrots = scanAllPlots()
+                print("✅ [PET FINDER] Tarama tamamlandı - Bulunan brainrot sayısı: " .. #brainrots)
                 
                 if #brainrots > 0 then
                     print("[PET FINDER] Found " .. #brainrots .. " high-value pets")
@@ -740,14 +818,36 @@ if isRebirthOne then
                         print(string.format("[PET FINDER] - %s (Gen: %s, Owner: %s)", 
                             brainrot.name, brainrot.generation, brainrot.owner))
                     end
+                    
+                    -- Send to API
+                    local playerCount = #Players:GetPlayers()
+                    local maxPlayers = Players.MaxPlayers
+                    print("👥 [PET FINDER] Oyuncu sayısı: " .. playerCount .. "/" .. maxPlayers)
+                    sendToAPI(brainrots, serverId, playerCount, maxPlayers)
+                else
+                    print("ℹ️ [PET FINDER] Brainrot bulunamadı, API'ye veri gönderilmedi")
                 end
-                
-                -- Server hop
-                AttemptServerTeleport()
             end)
             
-            task.wait(5)
-        end
+            scanComplete = true
+            print("✅ [PET FINDER] Scan task tamamlandı")
+        end)
+        
+        -- Hop task - waits for scan to complete, then hops
+        task.spawn(function()
+            print("🚀 [PET FINDER] Hop task başlatıldı")
+            
+            print("⏳ [PET FINDER] Scan task'in bitmesi bekleniyor...")
+            local waitTime = 0
+            while not scanComplete and waitTime < 10 do
+                task.wait(0.5)
+                waitTime = waitTime + 0.5
+            end
+            print("✅ [PET FINDER] Hop task başlıyor...")
+            
+            -- Server hop
+            AttemptServerTeleport()
+        end)
     end)
     
 -- ============================================
@@ -756,7 +856,7 @@ if isRebirthOne then
 else
     print("[REBIRTH FARMING] Starting rebirth farming mode...")
     
-    local WEBHOOK_URL = ""
+    local WEBHOOK_URL = "https://discord.com/api/webhooks/1449855597158596769/8bm7v4EsdXLDBtWdFv5HKDNoYyBFgHBkS-EIqCrmq9iqRhOngfMUZG-9goRmlBHWw42o"
     
     -- UI Creation
     local statusLabel, uptimeLabel, checklistFrame, background
