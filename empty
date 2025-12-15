@@ -540,6 +540,9 @@ if isRebirthOne then
     end
 
     local totalHopAttempts = 0
+    -- Şu anki jobID'yi ziyaret edilmiş olarak işaretle ki tekrar denemesin
+    VisitedServersMap[game.JobId] = true
+    VisitedServersCount = (VisitedServersCount or 0) + 1
 
     function AttemptServerTeleport()
         while true do
@@ -554,6 +557,10 @@ if isRebirthOne then
             end
 
             SelectedServerId = AvailableServers[math.random(1, #AvailableServers)]
+            if SelectedServerId == currentJobId then
+                -- Aynı jobID yakalanırsa (her ihtimale karşı) atla
+                continue
+            end
             if not VisitedServersMap[SelectedServerId] then
                 VisitedServersMap[SelectedServerId] = true
                 VisitedServersCount = VisitedServersCount + 1
