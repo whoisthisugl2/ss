@@ -1,0 +1,1640 @@
+setfpscap(10)
+settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+game:GetService("UserInputService").MouseIconEnabled = false
+
+local GRAPHICS_FFLAGS = {
+    -- Core Rendering
+    ["FFlagDebugForceFutureIsBrightPhase3"] = "True",
+    ["FIntDebugForceMSAASamples"] = "1",
+    ["FIntTerrainArraySliceSize"] = "0",
+    ["DFFlagDisableDPIScale"] = "True",
+    ["FIntRenderShadowIntensity"] = "0",
+    ["FFlagDisablePostFx"] = "True",
+    ["FFlagDebugGraphicsPreferD3D11FL10"] = "True",
+    ["FFlagDebugGraphicsPreferD3D11"] = "True",
+    ["DFFlagDebugRenderForceTechnologyVoxel"] = "True",
+    ["FFlagDebugGraphicsPreferVulkan"] = "True",
+    ["FFlagDebugGraphicsPreferOpenGL"] = "True",
+    ["FFlagDebugRenderingSetDeterministic"] = "False",
+    
+    -- Texture Quality (LOW)
+    ["DFIntTextureQualityOverride"] = "0",
+    ["DFFlagTextureQualityOverrideEnabled"] = "True",
+    ["DFIntPerformanceControlTextureQualityBestUtility"] = "-1",
+    ["FIntUITextureMaxRenderTextureSize"] = "1024",
+    ["FIntTerrainOTAMaxTextureSize"] = "1024",
+    ["FFlagRenderGpuTextureCompressor"] = "True",
+    ["FFlagPreloadTextureItemsOption4"] = "True",
+    
+    -- Shadows & Lighting (DISABLED)
+    ["FIntRenderShadowmapBias"] = "0",
+    ["FIntRenderLocalLightUpdatesMin"] = "1",
+    ["FIntRenderLocalLightUpdatesMax"] = "1",
+    ["FFlagNewLightAttenuation"] = "True",
+    ["FFlagDebugLightGridShowChunks"] = "False",
+    ["FFlagFastGPULightCulling3"] = "True",
+    ["FFlagDebugSkyGray"] = "True",
+    
+    -- Grass & Terrain (DISABLED)
+    ["FIntRenderGrassHeightScaler"] = "0",
+    ["FIntRenderGrassDetailStrands"] = "0",
+    ["FIntFRMMinGrassDistance"] = "0",
+    ["FIntFRMMaxGrassDistance"] = "0",
+    
+    -- LOD (Level of Detail) - MINIMAL
+    ["DFIntCSGLevelOfDetailSwitchingDistance"] = "1",
+    ["DFIntCSGLevelOfDetailSwitchingDistanceL12"] = "1",
+    ["DFIntCSGLevelOfDetailSwitchingDistanceL23"] = "1",
+    ["DFIntCSGLevelOfDetailSwitchingDistanceL34"] = "1",
+    
+    -- Frame Rate & Performance
+    ["DFIntTaskSchedulerTargetFps"] = "69420",
+    ["FFlagTaskSchedulerLimitTargetFpsTo2402"] = "False",
+    ["FFlagGameBasicSettingsFramerateCap5"] = "True",
+    ["FIntRuntimeMaxNumOfThreads"] = "2400",
+    ["FIntTaskSchedulerThreadMin"] = "3",
+    
+    -- Memory & Cache
+    ["FIntDefaultMeshCacheSizeMB"] = "256",
+    ["FIntMeshContentProviderForceCacheSize"] = "268435456",
+    ["DFIntUserIdPlayerNameCacheSize"] = "33554432",
+    ["FIntEmotesAnimationsPerPlayerCacheSize"] = "16777216",
+    ["DFIntHttpCurlConnectionCacheSize"] = "134217728",
+    
+    -- Animation
+    ["DFIntMaxFrameBufferSize"] = "4",
+    ["FFlagAnimationClipMemCacheEnabled"] = "True",
+    
+    -- UI & Display
+    ["FIntFontSizePadding"] = "4",
+    ["FFlagHandleAltEnterFullscreenManually"] = "False",
+    ["FIntFullscreenTitleBarTriggerDelayMillis"] = "3600000",
+    ["FFlagCoreGuiTypeSelfViewPresent"] = "False",
+    ["FFlagPreloadAllFonts"] = "True",
+    
+    -- Network Optimizations (Graphics-related)
+    ["FFlagOptimizeNetwork"] = "True",
+    ["FFlagOptimizeNetworkRouting"] = "True",
+    ["FFlagOptimizeNetworkTransport"] = "True",
+    ["DFIntOptimizePingThreshold"] = "50",
+    ["DFIntConnectionMTUSize"] = "900",
+    ["DFIntRakNetMtuValue1InBytes"] = "1280",
+    ["DFIntRakNetMtuValue2InBytes"] = "1240",
+    ["DFIntRakNetMtuValue3InBytes"] = "1200",
+    
+    -- Telemetry & Debugging (DISABLED)
+    ["DFFlagEnableHardwareTelemetry"] = "False",
+    ["FIntBootstrapperTelemetryReportingHundredthsPercentage"] = "0",
+    ["DFFlagSimReportCPUInfo"] = "False",
+    ["FFlagDebugDisableTelemetryV2Stat"] = "True",
+    ["FFlagDebugDisableTelemetryPoint"] = "True",
+    ["FFlagDebugDisableTelemetryV2Counter"] = "True",
+    ["FFlagDebugDisableTelemetryEventIngest"] = "True",
+    ["FFlagDebugDisableTelemetryEphemeralStat"] = "True",
+    ["FFlagDebugDisableTelemetryV2Event"] = "True",
+    ["FFlagDebugDisableTelemetryEphemeralCounter"] = "True",
+    ["DFFlagEnableGCapsHardwareTelemetry"] = "False",
+    ["DFIntHardwareTelemetryHundredthsPercent"] = "0",
+    ["DFIntLightstepHTTPTransportHundredthsPercent2"] = "0",
+    ["DFFlagEnableLightstepReporting2"] = "False",
+    ["DFFlagAudioDeviceTelemetry"] = "False",
+    ["DFFlagGpuVsCpuBoundTelemetry"] = "False",
+    ["DFFlagEnableFmodErrorsTelemetry"] = "False",
+    ["FFlagEnableSoundTelemetry"] = "False",
+    ["DFIntReportRecordingDeviceInfoRateHundredthsPercentage"] = "0",
+    ["DFIntReportOutputDeviceInfoRateHundredthsPercentage"] = "0",
+    ["DFIntGoogleAnalyticsLoadPlayerHundredth"] = "0",
+    ["FFlagDebugDisplayFPS"] = "False",
+    
+    -- Menu & UI Optimization
+    ["FFlagEnableInGameMenuChrome"] = "True",
+    ["FFlagEnableInGameMenuV3"] = "True",
+    ["FFlagEnableInGameMenuModernization"] = "True",
+    ["FFlagEnableInGameMenuControls"] = "True",
+    ["FFlagEnableMenuControlsABTest"] = "False",
+    ["FFlagEnableMenuModernizationABTest"] = "False",
+    ["FFlagEnableMenuModernizationABTest2"] = "False",
+    ["FFlagEnableInGameMenuChromeABTest3"] = "False",
+    ["FFlagEnableV3MenuABTest3"] = "False",
+    ["FFlagTopBarUseNewBadge"] = "True",
+    ["FFlagLuaAppSystemBar"] = "False",
+    ["FFlagLuaAppExitModal2"] = "False",
+    ["FFlagLuaAppExitModalDoNotShow"] = "True",
+    ["FFlagInGameMenuV1FullScreenTitleBar"] = "False",
+    ["FFlagDisableNewIGMinDUA"] = "True",
+    ["FStringInGameMenuChromeForcedUserIds"] = "1353919681",
+    
+    -- Misc Performance
+    ["FFlagFixGraphicsQuality"] = "True",
+    ["FFlagMSRefactor5"] = "False",
+    ["FFlagGpuGeometryManager7"] = "True",
+    ["FFlagBatchAssetApi"] = "True",
+    ["DFFlagBatchAssetApiNoFallbackOnFail"] = "False",
+    ["DFFlagDebugPauseVoxelizer"] = "True",
+    ["FFlagAdServiceEnabled"] = "False",
+    ["FFlagReconnectDisabled"] = "True",
+    ["FFlagDontCreatePingJob"] = "True",
+    ["FFlagEnableQuickGameLaunch"] = "False",
+    
+    -- Analytics Opt-Out
+    ["DFStringRobloxAnalyticsSubDomain"] = "opt-out",
+    ["DFStringAltTelegrafHTTPTransportUrl"] = "http://opt-out.roblox.com",
+    ["FStringErrorUploadToBacktraceBaseUrl"] = "http://opt-out.roblox.com",
+    ["DFStringHttpPointsReporterUrl"] = "http://opt-out.roblox.com",
+    ["FStringPerformanceSendMeasurementAPISubdomain"] = "opt-out",
+    ["DFStringAltHttpPointsReporterUrl"] = "http://opt-out.roblox.com",
+    ["DFStringCrashUploadToBacktraceBaseUrl"] = "http://opt-out.roblox.com",
+    ["DFStringAnalyticsEventStreamUrlEndpoint"] = "opt-out",
+    ["DFStringTelegrafHTTPTransportUrl"] = "http://opt-out.roblox.com",
+    ["DFStringRobloxAnalyticsURL"] = "http://opt-out.roblox.com",
+    
+    -- Network Performance (Advanced)
+    ["DFIntNetworkPrediction"] = "120",
+    ["DFIntNetworkLatencyTolerance"] = "1",
+    ["DFIntPlayerNetworkUpdateQueueSize"] = "20",
+    ["DFIntPlayerNetworkUpdateRate"] = "60",
+    ["DFIntServerTickRate"] = "60",
+    ["DFIntServerPhysicsUpdateRate"] = "60",
+    ["FFlagOptimizeServerTickRate"] = "True",
+    ["DFFlagRakNetUseSlidingWindow4"] = "True",
+    ["FIntRakNetDatagramMessageIdArrayLength"] = "1024",
+    ["FIntRakNetResendBufferArrayLength"] = "1024",
+    ["DFIntRakNetNakResendDelayMs"] = "10",
+    ["DFIntRakNetNakResendDelayMsMax"] = "100",
+    ["DFIntRakNetNakResendDelayRttPercent"] = "50",
+    ["DFIntRakNetResendRttMultiple"] = "1",
+    ["DFIntRaknetBandwidthPingSendEveryXSeconds"] = "1",
+    ["DFIntRakNetClockDriftAdjustmentPerPingMillisecond"] = "100",
+    ["DFIntRaknetBandwidthInfluxHundredthsPercentageV2"] = "10000",
+    ["DFFlagQueueDataPingFromSendData"] = "True",
+    ["DFIntRakNetLoopMs"] = "1",
+    ["DFIntWaitOnRecvFromLoopEndedMS"] = "100",
+    ["DFIntWaitOnUpdateNetworkLoopEndedMS"] = "100",
+    ["DFIntLargePacketQueueSizeCutoffMB"] = "1000",
+    ["DFIntMaxProcessPacketsJobScaling"] = "10000",
+    ["DFIntMaxProcessPacketsStepsAccumulated"] = "0",
+    ["DFIntMaxProcessPacketsStepsPerCyclic"] = "5000",
+    ["DFIntMegaReplicatorNetworkQualityProcessorUnit"] = "10",
+    ["DFIntCodecMaxIncomingPackets"] = "100",
+    ["DFIntCodecMaxOutgoingFrames"] = "10000",
+    
+    -- Logging
+    ["FLogNetwork"] = "7",
+    ["DFIntUserIdPlayerNameLifetimeSeconds"] = "86400",
+    ["FIntLmsClientRollout2"] = "0",
+}
+
+-- Apply all graphics FFlags
+local function applyGraphicsFFlags()
+    local success = 0
+    local failed = 0
+
+    for flag, value in pairs(GRAPHICS_FFLAGS) do
+        local ok = pcall(function()
+            setfflag(flag, tostring(value))
+        end)
+
+        if ok then
+            success = success + 1
+        else
+            failed = failed + 1
+        end
+    end
+
+    print(string.format("[Graphics FFlags] Applied %d/%d flags successfully", success, success + failed))
+end
+
+-- Apply immediately on script start
+pcall(applyGraphicsFFlags)
+
+-- ONE-TIME texture removal (floors, walls, world parts only - NOT characters)
+local function removeWorldTextures()
+    print("[Texture Removal] Removing world textures (one-time)...")
+    local removed = 0
+    
+    -- Get workspace map/world objects only
+    local workspace = game:GetService("Workspace")
+    local map = workspace:FindFirstChild("Map")
+    local plots = workspace:FindFirstChild("Plots")
+    
+    -- Function to clean an object tree
+    local function cleanObjectTree(parent)
+        for _, obj in pairs(parent:GetDescendants()) do
+            pcall(function()
+                -- Only clean BaseParts (floors, walls, world objects)
+                if obj:IsA("BasePart") and not obj.Parent:IsA("Model") then
+                    obj.Material = Enum.Material.SmoothPlastic
+                    obj.Reflectance = 0
+                    obj.CastShadow = false
+                    removed = removed + 1
+                end
+                
+                -- Remove mesh textures (world objects only)
+                if obj:IsA("MeshPart") and not obj:IsDescendantOf(game:GetService("Players").LocalPlayer.Character or workspace.Camera) then
+                    obj.TextureID = ""
+                    obj.Material = Enum.Material.SmoothPlastic
+                    obj.Reflectance = 0
+                    obj.CastShadow = false
+                    removed = removed + 1
+                end
+                
+                -- Remove special mesh textures
+                if obj:IsA("SpecialMesh") then
+                    obj.TextureId = ""
+                    removed = removed + 1
+                end
+                
+                -- Remove decals on world (keep character faces)
+                if obj:IsA("Decal") and not obj:IsDescendantOf(game:GetService("Players").LocalPlayer.Character or workspace.Camera) then
+                    obj:Destroy()
+                    removed = removed + 1
+                end
+                
+                -- Remove surface textures
+                if obj:IsA("Texture") then
+                    obj:Destroy()
+                    removed = removed + 1
+                end
+                
+                -- Remove PBR textures (world only)
+                if obj:IsA("SurfaceAppearance") and not obj:IsDescendantOf(game:GetService("Players").LocalPlayer.Character or workspace.Camera) then
+                    obj:Destroy()
+                    removed = removed + 1
+        end
+    end)
+end
+    end
+    
+    -- Clean the map
+    if map then
+        cleanObjectTree(map)
+end
+
+    -- Clean plots (bases)
+    if plots then
+        cleanObjectTree(plots)
+    end
+    
+    print(string.format("[Texture Removal] Removed %d world textures", removed))
+end
+
+-- Potato Graphics
+local function applyPotatoGraphics()
+    local lighting = game:GetService("Lighting")
+    lighting.GlobalShadows = false
+    lighting.FogEnd = 9e9
+    lighting.Brightness = 0
+    
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    
+    for _, v in pairs(game:GetDescendants()) do
+        pcall(function()
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
+                v.Enabled = false
+    end
+            if v:IsA("Explosion") then
+                v.BlastPressure = 1
+                v.BlastRadius = 1
+            end
+            if v:IsA("PostEffect") or v:IsA("BlurEffect") or v:IsA("SunRaysEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("BloomEffect") or v:IsA("DepthOfFieldEffect") then
+                v.Enabled = false
+            end
+            if v:IsA("BasePart") and not v:IsA("MeshPart") then
+                v.Material = Enum.Material.SmoothPlastic
+                v.Reflectance = 0
+                v.CastShadow = false
+    end
+            if v:IsA("Decal") or v:IsA("Texture") then
+                v.Transparency = 1
+            end
+            if v:IsA("MeshPart") then
+                v.Material = Enum.Material.SmoothPlastic
+                v.Reflectance = 0
+                v.TextureID = ""
+                v.CastShadow = false
+    end
+        end)
+    end
+end
+
+applyPotatoGraphics()
+
+-- Wait a bit for game to load, then remove world textures ONCE
+task.spawn(function()
+    task.wait(2) -- Wait for world to load
+    removeWorldTextures()
+end)
+
+local function safeGetService(serviceName)
+    local success, service = pcall(function()
+        return game:GetService(serviceName)
+    end)
+    return success and service or nil
+end
+
+-- Services
+local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local VIM = game:GetService("VirtualInputManager")
+local TweenService = game:GetService("TweenService")
+local CoreGui = safeGetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- Wait for game to load
+repeat task.wait() until game:IsLoaded()
+
+-- Wait for player to load
+print("[LOADING] Waiting for player...")
+local player = Players.LocalPlayer
+while not player do
+    task.wait(0.1)
+    player = Players.LocalPlayer
+end
+print("[LOADING] Player found:", player.Name)
+
+-- Check rebirth status
+print("[LOADING] Waiting for leaderstats...")
+local leaderstats = player:WaitForChild("leaderstats")
+if not leaderstats then
+    warn("[ERROR] leaderstats not found!")
+    return
+end
+
+print("[LOADING] Leaderstats found, waiting for Rebirths...")
+local Rebirths = leaderstats:WaitForChild("Rebirths")
+if not Rebirths then
+    warn("[ERROR] Rebirths stat not found!")
+    return
+end
+
+local isRebirthOne = false
+if Rebirths then
+    isRebirthOne = Rebirths.Value >= 1
+    print("[REBIRTH CHECK] Current rebirths:", Rebirths.Value)
+    print("[REBIRTH CHECK] Is Rebirth 1+:", isRebirthOne)
+end
+
+-- ============================================
+-- PET FINDER SYSTEM (Rebirth 1+)
+-- ============================================
+if isRebirthOne then
+    print("[PET FINDER] Starting pet finder mode...")
+    
+    getgenv().PetFinderSettings = getgenv().PetFinderSettings or {}
+    local Settings = getgenv().PetFinderSettings
+
+    ServerCacheFileName = "server_cache.json"
+    HopSettings = { sortOrder = "Asc", minPlayers = 1 }
+    ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
+    AllowedPlaceId = game.PlaceId
+    RetryDelaySeconds = 3
+    VisitedServersMap = {}
+    VisitedServersCount = 0
+
+    function SaveServerCache()
+        pcall(function()
+            writefile(ServerCacheFileName, HttpService:JSONEncode(ApiState))
+        end)
+    end
+
+    function LoadServerCache()
+        IsSuccess, CacheData = pcall(function()
+            return readfile(ServerCacheFileName)
+        end)
+        if not IsSuccess or not CacheData or CacheData == "" then
+            ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
+            SaveServerCache()
+            return
+        end
+        DecodeSuccess, DecodedData = pcall(function()
+            return HttpService:JSONDecode(CacheData)
+        end)
+        if not DecodeSuccess or type(DecodedData) ~= "table" then
+            ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
+            SaveServerCache()
+            return
+        end
+        ApiState = DecodedData
+        if #ApiState.cachedServers > 500 then
+            TrimmedCache = {}
+            for Index = #ApiState.cachedServers - 300, #ApiState.cachedServers do
+                if ApiState.cachedServers[Index] then
+                    table.insert(TrimmedCache, ApiState.cachedServers[Index])
+                end
+            end
+            ApiState.cachedServers = TrimmedCache
+            SaveServerCache()
+        end
+    end
+
+    function GetCachedServersList()
+        ServersList = {}
+        CurrentJobId = game.JobId
+        for _, ServerId in ipairs(ApiState.cachedServers) do
+            if ServerId ~= CurrentJobId and not VisitedServersMap[ServerId] then
+                table.insert(ServersList, ServerId)
+            end
+        end
+        return ServersList
+    end
+
+    function FetchServersFromApi()
+        ServersList = {}
+        CursorToken = ""
+        CurrentJobId = game.JobId
+        for PageIndex = 1, 3 do
+            ApiUrl = "https://games.roblox.com/v1/games/" .. AllowedPlaceId .. "/servers/Public?sortOrder=" .. HopSettings.sortOrder .. "&limit=100&excludeFullGames=true"
+            if CursorToken ~= "" then
+                ApiUrl = ApiUrl .. "&cursor=" .. CursorToken
+            end
+            FetchSuccess, ResponseData = pcall(function()
+                return game:HttpGet(ApiUrl)
+            end)
+            if not FetchSuccess then break end
+            ResponseBody = HttpService:JSONDecode(ResponseData)
+            if not ResponseBody.data then break end
+            for _, ServerInfo in ipairs(ResponseBody.data) do
+                if ServerInfo.playing < ServerInfo.maxPlayers and ServerInfo.id ~= CurrentJobId and not VisitedServersMap[ServerInfo.id] then
+                    table.insert(ServersList, ServerInfo.id)
+                    if not VisitedServersMap[ServerInfo.id] then
+                        table.insert(ApiState.cachedServers, ServerInfo.id)
+                    end
+                end
+            end
+            CursorToken = ResponseBody.nextPageCursor or ""
+            if CursorToken == "" then break end
+        end
+        ApiState.lastCacheUpdate = os.time()
+        SaveServerCache()
+        return ServersList
+    end
+
+    function GetAvailableServersList()
+        ServersList = FetchServersFromApi()
+        if #ServersList == 0 then
+            return GetCachedServersList()
+        end
+        return ServersList
+    end
+
+    function AttemptServerTeleport()
+        for AttemptIndex = 1, 10 do
+            AvailableServers = GetAvailableServersList()
+            if #AvailableServers == 0 then
+                VisitedServersMap = {}
+                VisitedServersCount = 0
+                task.wait(RetryDelaySeconds)
+                continue
+            end
+            SelectedServerId = AvailableServers[math.random(1, #AvailableServers)]
+            if not VisitedServersMap[SelectedServerId] then
+                VisitedServersMap[SelectedServerId] = true
+                VisitedServersCount = VisitedServersCount + 1
+            end
+            if VisitedServersCount > 100 then
+                ServerKeys = {}
+                for Key in pairs(VisitedServersMap) do table.insert(ServerKeys, Key) end
+                for KeyIndex = 1, #ServerKeys - 50 do
+                    VisitedServersMap[ServerKeys[KeyIndex]] = nil
+                    VisitedServersCount = VisitedServersCount - 1
+                end
+            end
+            TeleportSuccess = pcall(function()
+                if queue_on_teleport and readfile then
+                    ReadSuccess, TeleportScriptContent = pcall(function()
+                        return readfile("hopper.txt")
+                    end)
+                    if ReadSuccess and TeleportScriptContent and TeleportScriptContent ~= "" then
+                        queue_on_teleport(TeleportScriptContent)
+                    end
+                end
+                TeleportService:TeleportToPlaceInstance(AllowedPlaceId, SelectedServerId)
+            end)
+            if TeleportSuccess then return true end
+            task.wait(RetryDelaySeconds)
+        end
+        return false
+    end
+
+    -- ===============================
+    -- Utility Functions for Plot Scanning
+    -- ===============================
+    local MIN_GENERATION = 10
+    
+    local function extractGenerationNumber(genString)
+        local genText = tostring(genString)
+        local billionNumber = genText:match('(%d+%.?%d*)B')
+        if billionNumber then return tonumber(billionNumber)*1000 end
+        local millionNumber = genText:match('(%d+%.?%d*)M')
+        if millionNumber then return tonumber(millionNumber) end
+        return 0
+    end
+    
+    local function getUsernameFromPlayers(displayName)
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.DisplayName == displayName then return player.Name end
+        end
+        return nil
+    end
+    
+    local function getUsernameFromPlot(plot)
+        local success, result = pcall(function()
+            if plot:FindFirstChild('Owner') then
+                local owner = plot.Owner
+                if owner:IsA('StringValue') or owner:IsA('ObjectValue') then
+                    return owner.Value
+                end
+            end
+            local ownerAttr = plot:GetAttribute('Owner')
+            if ownerAttr then return ownerAttr end
+            if plot:FindFirstChild('OwnerName') then
+                local ownerName = plot.OwnerName
+                if ownerName:IsA('StringValue') then return ownerName.Value end
+            end
+            local ownerNameAttr = plot:GetAttribute('OwnerName')
+            if ownerNameAttr then return ownerNameAttr end
+            local userId = plot:GetAttribute('UserId') or (plot:FindFirstChild('UserId') and plot.UserId.Value)
+            if userId then
+                local success2, username = pcall(function()
+                    return Players:GetNameFromUserIdAsync(userId)
+                end)
+                if success2 then return username end
+            end
+            return nil
+        end)
+        if success and result then return result end
+        return nil
+    end
+    
+    local function getPlotDisplayName(plotId)
+        local success, result = pcall(function()
+            local textLabel = Workspace.Plots[plotId].PlotSign.SurfaceGui.Frame.TextLabel
+            if textLabel and textLabel.Text then
+                return textLabel.Text:gsub("'s Base", '')
+            end
+            return nil
+        end)
+        if success and result then return result end
+        return nil
+    end
+    
+    local function getActualUsername(displayName, plot)
+        local username = getUsernameFromPlayers(displayName)
+        if username then return username end
+        username = getUsernameFromPlot(plot)
+        if username then return username end
+        return displayName
+    end
+    
+    local function findGenerationRecursive(parent)
+        if not parent then return nil end
+        local descendants = parent:GetDescendants()
+        for _, descendant in ipairs(descendants) do
+            if descendant:IsA('TextLabel') and descendant.Name == 'Generation' then
+                local text = descendant.Text
+                if text and text ~= '' then return text end
+            end
+        end
+        return nil
+    end
+    
+    local function checkPodium(plotId, podiumName)
+        local success, result = pcall(function()
+            local podiumFolder = Workspace.Plots[plotId]:FindFirstChild('AnimalPodiums')
+            if not podiumFolder then return nil end
+            local podium = podiumFolder:FindFirstChild(podiumName)
+            if not podium then return nil end
+            local base = podium:FindFirstChild('Base')
+            if not base then return nil end
+            local spawn = base:FindFirstChild('Spawn')
+            if not spawn then return nil end
+            if spawn:FindFirstChild('Attachment') then
+                local overhead = spawn.Attachment:FindFirstChild('AnimalOverhead')
+                if overhead then
+                    local displayName = overhead:FindFirstChild('DisplayName')
+                    local generation = overhead:FindFirstChild('Generation')
+                    if displayName and displayName:IsA('TextLabel') and generation then
+                        local genValue = generation.Text or tostring(generation.Value) or 'Unknown'
+                        return { name = displayName.Text, gen = genValue, hasAttachment = true, }
+                    end
+                end
+            end
+            if spawn:FindFirstChild('PromptAttachment') then
+                local promptAttachment = spawn.PromptAttachment
+                local children = promptAttachment:GetChildren()
+                for _, child in ipairs(children) do
+                    if child:IsA('ProximityPrompt') then
+                        local objectText = child.ObjectText
+                        if objectText and objectText ~= '' then
+                            return { name = objectText, gen = 'Unknown', hasAttachment = false, }
+                        end
+                    end
+                end
+            end
+            return nil
+        end)
+        if success and result and result.name and result.name ~= '' then return result end
+        return nil
+    end
+    
+    -- ===============================
+    -- Scanning Logic
+    -- ===============================
+    local function scanAllPlots()
+        local allBrainrots = {}
+        
+        if not Workspace:FindFirstChild('Plots') then
+            print("⚠️ [DEBUG] Plots bulunamadı!")
+            return {}
+        end
+        print("🔍 [DEBUG] Plotlar taranıyor...")
+        
+        for _, plot in pairs(Workspace.Plots:GetChildren()) do
+            local plotId = plot.Name
+            local displayName = getPlotDisplayName(plotId)
+            
+            if displayName then
+                local actualUsername = getActualUsername(displayName, plot)
+                local animalPodiums = plot:FindFirstChild('AnimalPodiums')
+                
+                if animalPodiums then
+                    -- First pass: Handle podiums WITH attachments (normal search)
+                    for _, podium in pairs(animalPodiums:GetChildren()) do
+                        local podiumName = podium.Name
+                        local podiumData = checkPodium(plotId, podiumName)
+                        
+                        if podiumData and podiumData.hasAttachment then
+                            local genNum = extractGenerationNumber(podiumData.gen)
+                            if genNum >= MIN_GENERATION then
+                                table.insert(allBrainrots, {
+                                    name = podiumData.name,
+                                    generation = podiumData.gen,
+                                    owner = actualUsername,
+                                    count = 1,
+                                    genNum = genNum
+                                })
+                            end
+                        end
+                    end
+                end
+                
+                -- Second pass: Backup search - directly scan base for folders with FakeRootPart
+                for _, folder in pairs(plot:GetChildren()) do
+                    if folder:IsA('Folder') or folder:IsA('Model') then
+                        local fakeRootPart = folder:FindFirstChild('FakeRootPart')
+                        if fakeRootPart then
+                            -- Get brainrot name from folder name (parent of FakeRootPart)
+                            local brainrotName = folder.Name
+                            
+                            -- Search this specific folder for Generation
+                            local generation = findGenerationRecursive(fakeRootPart)
+                            
+                            if generation and generation ~= '' and generation ~= 'Unknown' then
+                                local genNum = extractGenerationNumber(generation)
+                                if genNum >= MIN_GENERATION then
+                                    table.insert(allBrainrots, {
+                                        name = brainrotName,
+                                        generation = generation,
+                                        owner = actualUsername,
+                                        count = 1,
+                                        genNum = genNum
+                                    })
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        
+        table.sort(allBrainrots, function(a, b)
+            return a.genNum > b.genNum
+        end)
+        
+        for _, brainrot in ipairs(allBrainrots) do
+            brainrot.genNum = nil
+        end
+        
+        print("✅ [DEBUG] Tarama tamamlandı - Toplam " .. #allBrainrots .. " brainrot bulundu")
+        return allBrainrots
+    end
+
+    LoadServerCache()
+    
+    print("[PET FINDER] Starting scan loop...")
+    
+    task.spawn(function()
+        task.wait(2)
+        while true do
+            pcall(function()
+                -- Scan for pets using plot scanning method
+                local brainrots = scanAllPlots()
+                
+                if #brainrots > 0 then
+                    print("[PET FINDER] Found " .. #brainrots .. " high-value pets")
+                    for _, brainrot in ipairs(brainrots) do
+                        print(string.format("[PET FINDER] - %s (Gen: %s, Owner: %s)", 
+                            brainrot.name, brainrot.generation, brainrot.owner))
+                    end
+                end
+                
+                -- Server hop
+                AttemptServerTeleport()
+            end)
+            
+            task.wait(5)
+        end
+    end)
+    
+-- ============================================
+-- REBIRTH FARMING SYSTEM (Not Rebirth 1)
+-- ============================================
+else
+    print("[REBIRTH FARMING] Starting rebirth farming mode...")
+    
+    local WEBHOOK_URL = ""
+    
+    -- UI Creation
+    local statusLabel, uptimeLabel, checklistFrame, background
+    local checklistLabels = {}
+    local visualizeEnabled = false
+    local lastBaseLockTime = 0
+    local scriptStartTime = tick()
+    
+    local function createUI()
+        if not CoreGui or CoreGui:FindFirstChild("LuxarRebirthUI") then 
+            return 
+        end
+
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Name = "LuxarRebirthUI"
+        screenGui.ResetOnSpawn = false
+        screenGui.IgnoreGuiInset = true
+        screenGui.Parent = CoreGui
+
+        background = Instance.new("Frame")
+        background.Size = UDim2.new(1, 0, 1, 0)
+        background.Position = UDim2.new(0, 0, 0, 0)
+        background.BackgroundColor3 = Color3.fromRGB(14, 14, 14)
+        background.BackgroundTransparency = 0
+        background.Parent = screenGui
+
+        local topLabel = Instance.new("TextLabel")
+        topLabel.Size = UDim2.new(1, 0, 0, 60)
+        topLabel.Position = UDim2.new(0, 0, 0, 0)
+        topLabel.BackgroundTransparency = 1
+        topLabel.Text = "Auto rebirth 1 • .gg/luxar"
+        topLabel.Font = Enum.Font.SourceSansBold
+        topLabel.TextSize = 32
+        topLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        topLabel.Parent = background
+    
+        statusLabel = Instance.new("TextLabel")
+        statusLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+        statusLabel.Position = UDim2.new(0.5, 0, 0.35, 0)
+        statusLabel.Size = UDim2.new(0, 500, 0, 50)
+        statusLabel.BackgroundTransparency = 1
+        statusLabel.Text = "Status: Initializing"
+        statusLabel.Font = Enum.Font.SourceSans
+        statusLabel.TextSize = 24
+        statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+        statusLabel.Parent = background
+    
+        uptimeLabel = Instance.new("TextLabel")
+        uptimeLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+        uptimeLabel.Position = UDim2.new(0.5, 0, 0.4, 0)
+        uptimeLabel.Size = UDim2.new(0, 400, 0, 40)
+        uptimeLabel.BackgroundTransparency = 1
+        uptimeLabel.Text = "Uptime: 00:00:00"
+        uptimeLabel.Font = Enum.Font.SourceSans
+        uptimeLabel.TextSize = 20
+        uptimeLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+        uptimeLabel.Parent = background
+    
+        local farmingLabel = Instance.new("TextLabel")
+        farmingLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+        farmingLabel.Position = UDim2.new(0.5, 0, 0.45, 0)
+        farmingLabel.Size = UDim2.new(0, 400, 0, 40)
+        farmingLabel.BackgroundTransparency = 1
+        farmingLabel.Text = "Farming: luxarrebirth | Press X to toggle visualize"
+        farmingLabel.Font = Enum.Font.SourceSans
+        farmingLabel.TextSize = 20
+        farmingLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+        farmingLabel.Parent = background
+    
+        -- Checklist Frame
+        checklistFrame = Instance.new("Frame")
+        checklistFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+        checklistFrame.Position = UDim2.new(0.5, 0, 0.6, 0)
+        checklistFrame.Size = UDim2.new(0, 450, 0, 180)
+        checklistFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        checklistFrame.BorderSizePixel = 0
+        checklistFrame.Parent = background
+    
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = checklistFrame
+
+        local checklistTitle = Instance.new("TextLabel")
+        checklistTitle.Size = UDim2.new(1, 0, 0, 35)
+        checklistTitle.Position = UDim2.new(0, 0, 0, 0)
+        checklistTitle.BackgroundTransparency = 1
+        checklistTitle.Text = "Progress Checklist"
+        checklistTitle.Font = Enum.Font.SourceSansBold
+        checklistTitle.TextSize = 22
+        checklistTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+        checklistTitle.Parent = checklistFrame
+
+        local items = {
+            {name = "baseLocked", text = "❌ Base Locked", yPos = 40},
+            {name = "currentMoney", text = "💰 Current Money: $0", yPos = 70},
+            {name = "gangster", text = "❌ Gangster Footera", yPos = 100},
+            {name = "trippi", text = "❌ Trippi Troppi", yPos = 130},
+        }
+
+        for _, item in ipairs(items) do
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(1, -20, 0, 25)
+            label.Position = UDim2.new(0, 10, 0, item.yPos)
+            label.BackgroundTransparency = 1
+            label.Text = item.text
+            label.Font = Enum.Font.SourceSans
+            label.TextSize = 18
+            label.TextColor3 = Color3.fromRGB(200, 200, 200)
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            label.Parent = checklistFrame
+            checklistLabels[item.name] = label
+        end
+
+        -- Toggle keybind listener for X key
+        UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if not gameProcessed and input.KeyCode == Enum.KeyCode.X then
+                visualizeEnabled = not visualizeEnabled
+                if visualizeEnabled then
+                    background.BackgroundTransparency = 1
+                else
+                    background.BackgroundTransparency = 0
+                end
+            end
+        end)
+
+        -- Uptime counter
+        local startTime = os.clock()
+        task.spawn(function()
+            while true do
+                local elapsed = os.clock() - startTime
+                local hours = math.floor(elapsed / 3600)
+                local minutes = math.floor((elapsed % 3600) / 60)
+                local seconds = math.floor(elapsed % 60)
+                uptimeLabel.Text = string.format("Uptime: %02d:%02d:%02d", hours, minutes, seconds)
+                task.wait(1)
+            end
+        end)
+    end
+
+    createUI()
+
+    -- Auto reset every 60 seconds
+    task.spawn(function()
+        while task.wait(60) do
+            if tick() - scriptStartTime > 60 then
+                local char = player.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        hum.Health = 0
+                    end
+                end
+                scriptStartTime = tick()
+            end
+        end
+    end)
+
+    local function updateChecklist(item, value)
+        if not checklistLabels[item] then return end
+        
+        if item == "baseLocked" then
+            if value then
+                checklistLabels[item].Text = "✓ Base Locked"
+                checklistLabels[item].TextColor3 = Color3.fromRGB(0, 255, 0)
+            else
+                checklistLabels[item].Text = "❌ Base Locked"
+                checklistLabels[item].TextColor3 = Color3.fromRGB(200, 200, 200)
+            end
+        elseif item == "currentMoney" then
+            checklistLabels[item].Text = "💰 Current Money: $" .. tostring(value)
+        elseif item == "gangster" then
+            if value then
+                checklistLabels[item].Text = "✓ Gangster Footera"
+                checklistLabels[item].TextColor3 = Color3.fromRGB(0, 255, 0)
+            else
+                checklistLabels[item].Text = "❌ Gangster Footera"
+                checklistLabels[item].TextColor3 = Color3.fromRGB(200, 200, 200)
+            end
+        elseif item == "trippi" then
+            if value then
+                checklistLabels[item].Text = "✓ Trippi Troppi"
+                checklistLabels[item].TextColor3 = Color3.fromRGB(0, 255, 0)
+            else
+                checklistLabels[item].Text = "❌ Trippi Troppi"
+                checklistLabels[item].TextColor3 = Color3.fromRGB(200, 200, 200)
+            end
+        end
+    end
+
+    local function updateStatus(text)
+        if statusLabel then
+            statusLabel.Text = "Status: " .. text
+        end
+        print("[Luxar Rebirth]", text)
+    end
+
+    local function sendWebhook(status, extraFields)
+        local success, err = pcall(function()
+            local statusEmoji = "🔄"
+            local color = 16776960 -- Yellow
+            
+            if status:find("Complete") or status:find("Already") then
+                statusEmoji = "✅"
+                color = 65280 -- Green
+            elseif status:find("Starting") then
+                statusEmoji = "🚀"
+            end
+            
+            local embed = {
+                title = statusEmoji .. " Luxar Auto Rebirth",
+                description = "**Status:** " .. status,
+                color = color,
+                fields = {
+                    { name = "Username", value = player.Name, inline = true },
+                    { name = "User ID", value = tostring(player.UserId), inline = true },
+                    { name = "Job ID", value = game.JobId, inline = false }
+                },
+                timestamp = os.date('!%Y-%m-%dT%H:%M:%S.000Z'),
+                footer = { 
+                    text = ".gg/luxar",
+                    icon_url = "https://i.imgur.com/7Y1TjJY.png"
+                }
+            }
+
+            if extraFields then
+                for _, field in ipairs(extraFields) do
+                    table.insert(embed.fields, field)
+                end
+            end
+
+            local data = {
+                content = player.Name,
+                embeds = { embed }
+            }
+
+            request({
+                Url = WEBHOOK_URL,
+                Method = "POST",
+                Headers = { ["Content-Type"] = "application/json" },
+                Body = HttpService:JSONEncode(data),
+            })
+        end)
+        
+        if not success then
+            warn("Webhook failed:", err)
+        end
+    end
+
+    updateStatus("Loading game...")
+
+    if not leaderstats then
+        updateStatus("ERROR: No leaderstats found")
+        return
+    end
+
+    if not Rebirths then
+        updateStatus("ERROR: No Rebirths stat found")
+        return
+    end
+
+    updateStatus("Waiting for Cash stat...")
+    local cashValue = leaderstats:WaitForChild("Cash")
+    updateStatus("Cash stat found!")
+    
+    -- Update money display
+    task.spawn(function()
+        while task.wait(0.5) do
+            if cashValue then
+                updateChecklist("currentMoney", math.floor(cashValue.Value))
+            end
+        end
+    end)
+
+    -- Check if already rebirth 1+
+    if Rebirths.Value >= 1 then
+        updateStatus("DONE")
+        if background then
+            background.BackgroundColor3 = Color3.fromRGB(81, 255, 0)
+        end
+        statusLabel.Text = "Rebirth 1 has been completed on " .. player.Name
+        statusLabel.TextSize = 28
+        sendWebhook("Already Rebirth 1+", {
+            { name = "Current Rebirths", value = tostring(Rebirths.Value), inline = true }
+        })
+        return
+    end
+
+    -- Send starting webhook
+    sendWebhook("Starting Rebirth Process", {
+        { name = "Current Rebirths", value = tostring(Rebirths.Value), inline = true }
+    })
+
+    updateStatus("Starting rebirth process...")
+
+    -- Helper Functions
+    local function waitForPath(parent, ...)
+        local cur = parent
+        for _, name in ipairs({...}) do
+            repeat task.wait() until cur and cur:FindFirstChild(name)
+            cur = cur:FindFirstChild(name)
+        end
+        return cur
+    end
+    
+    local function isBasePart(x)
+        return typeof(x) == "Instance" and x:IsA("BasePart")
+    end
+    
+    local function forceRespawn()
+        local char = player.Character
+        if char then
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.CFrame = hrp.CFrame + Vector3.new(0, 100, 0)
+            end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.Health = 0
+                hum:Destroy()
+            end
+        end
+        
+        player.CharacterAdded:Wait()
+        task.wait(0.5)
+    end
+
+    local function ensureChar()
+        local c = player.Character
+        if not c or not c.Parent then
+            updateStatus("Character missing, respawning...")
+            forceRespawn()
+            c = player.Character or player.CharacterAdded:Wait()
+        end
+        
+        local h = c:FindFirstChildOfClass("Humanoid")
+        if not h or h.Health <= 0 then
+            updateStatus("Character dead, respawning...")
+            forceRespawn()
+            c = player.Character or player.CharacterAdded:Wait()
+            h = c:WaitForChild("Humanoid", 5)
+        end
+        
+        local hrp = c:FindFirstChild("HumanoidRootPart") or c.PrimaryPart
+        if not hrp then
+            updateStatus("No HumanoidRootPart, respawning...")
+            forceRespawn()
+            c = player.Character or player.CharacterAdded:Wait()
+            hrp = c:WaitForChild("HumanoidRootPart", 5)
+        end
+        
+        return c, h, hrp
+    end
+    
+    -- Monitor character health and respawn if dead
+    task.spawn(function()
+        while task.wait(2) do
+            local char = player.Character
+            if char then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum and hum.Health <= 0 then
+                    updateStatus("Detected death, respawning...")
+                    task.wait(0.5)
+                    forceRespawn()
+                end
+            end
+        end
+    end)
+
+    local function spamJump(times)
+        times = times or 10
+        local _, hum = ensureChar()
+        if not hum then return end
+        for _=1,times do
+            pcall(function()
+                hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                hum.Jump = true
+            end)
+            task.wait(0.05)
+        end
+    end
+
+    local function walkToDynamic(target, reach, timeout)
+        reach = reach or 3
+        timeout = timeout or 35
+        local _, hum, hrp = ensureChar()
+        if not hum or not hrp then return false end
+
+        local t0 = tick()
+        while tick() - t0 < timeout do
+            if not target or not target.Parent then return false end
+
+            local pos
+            if target:IsA("ProximityPrompt") then
+                local att = target.Parent
+                if att and att:IsA("Attachment") then
+                    pos = att.WorldPosition
+                elseif att and att:IsA("BasePart") then
+                    pos = att.Position
+                end
+            elseif isBasePart(target) then
+                pos = target.Position
+            end
+
+            if not pos then return false end
+
+            local mag = (hrp.Position - pos).Magnitude
+            if mag <= reach then return true end
+
+            pcall(function() hum:MoveTo(pos) end)
+            task.wait(0.15)
+        end
+        return false
+    end
+
+    local function parsePrice(txt)
+        if not txt then return math.huge end
+        local s = tostring(txt):upper():gsub("%$", ""):gsub(",", "")
+        local n = tonumber((s:match("[%d%.]+"))) or 0
+        if s:find("K") then n = n * 1000 end
+        if s:find("M") then n = n * 1000000 end
+        if s:find("B") then n = n * 1000000000 end
+        return n
+    end
+
+    local plots = waitForPath(Workspace, "Plots")
+
+    local function findMyPlot()
+        for _, plot in ipairs(plots:GetChildren()) do
+            local ok, text = pcall(function()
+                local sign = plot:FindFirstChild("PlotSign")
+                local gui = sign and sign:FindFirstChild("SurfaceGui")
+                local frame = gui and gui:FindFirstChild("Frame")
+                local label = frame and frame:FindFirstChild("TextLabel")
+                return label and label.Text
+            end)
+            if ok and text == (player.Name.."'s Base") then
+                return plot
+            end
+        end
+    end
+
+    local function ensureMyPlot()
+        local p = findMyPlot()
+        while not p do
+            task.wait(1)
+            p = findMyPlot()
+        end
+        return p
+    end
+
+    local function countOwned(plot)
+        local pods = plot and plot:FindFirstChild("AnimalPodiums")
+        if not pods then return 0 end
+        local c = 0
+        for _, pod in ipairs(pods:GetChildren()) do
+            local oh = pod:FindFirstChild("Base") and pod.Base:FindFirstChild("Spawn") and pod.Base.Spawn:FindFirstChild("Attachment")
+            oh = oh and oh:FindFirstChild("AnimalOverhead")
+            if oh then c += 1 end
+        end
+        return c
+    end
+
+    local function lockBase(plot)
+        if not plot then return false end
+        
+        local lockPrompt = nil
+        for _, desc in ipairs(plot:GetDescendants()) do
+            if desc:IsA("ProximityPrompt") then
+                local actionText = tostring(desc.ActionText or ""):lower()
+                if actionText:find("lock") then
+                    lockPrompt = desc
+                    break
+                end
+            end
+        end
+        
+        if lockPrompt and lockPrompt.Parent then
+            local success = walkToDynamic(lockPrompt, 5, 10)
+            if success then
+                pcall(function()
+                    lockPrompt.RequiresLineOfSight = false
+                    lockPrompt.MaxActivationDistance = 15
+                    VIM:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+                    task.wait(0.3)
+                    VIM:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                end)
+                lastBaseLockTime = tick()
+                updateChecklist("baseLocked", true)
+                return true
+            end
+        end
+        return false
+    end
+
+    local function buyBrainrot(entry, myPlot)
+        if not entry or not entry.part or not entry.part.Parent then 
+            return false 
+        end
+        
+        local _, hum, hrp = ensureChar()
+        if not hum or not hrp then 
+            return false 
+        end
+        
+        local followConnection
+        local spamConnection
+        local bought = false
+        local startTime = tick()
+        local maxTime = 15
+        local initialOwnedCount = countOwned(myPlot)
+        local lastEPress = 0
+        
+        -- Movement loop
+        followConnection = RunService.Heartbeat:Connect(function()
+            if bought or tick() - startTime > maxTime then
+                if followConnection then followConnection:Disconnect() end
+                return
+            end
+            
+            if not entry.part or not entry.part.Parent then
+                bought = true
+                if followConnection then followConnection:Disconnect() end
+                return
+            end
+            
+            local currentBrainrotPos = entry.part.Position
+            local currentVel = entry.part.AssemblyLinearVelocity or Vector3.zero
+            local nextPos = currentBrainrotPos + (currentVel * 0.3)
+            
+            pcall(function()
+                hum:MoveTo(nextPos)
+            end)
+            
+            -- Check if we bought it
+            local currentCount = countOwned(myPlot)
+            if currentCount > initialOwnedCount then
+                bought = true
+                if followConnection then followConnection:Disconnect() end
+                if spamConnection then spamConnection:Disconnect() end
+            end
+        end)
+        
+        -- Separate E spam loop that runs faster
+        spamConnection = RunService.Heartbeat:Connect(function()
+            if bought or tick() - startTime > maxTime then
+                if spamConnection then spamConnection:Disconnect() end
+                return
+            end
+            
+            if not entry.part or not entry.part.Parent or not entry.prompt or not entry.prompt.Parent then
+                if spamConnection then spamConnection:Disconnect() end
+                return
+            end
+            
+            local dist = (hrp.Position - entry.part.Position).Magnitude
+            
+            -- Continuously spam E when close enough
+            if dist <= 15 then
+                pcall(function()
+                    entry.prompt.RequiresLineOfSight = false
+                    entry.prompt.MaxActivationDistance = 20
+                end)
+                
+                -- Fire E event
+                pcall(function()
+                    fireproximityprompt(entry.prompt)
+                end)
+            end
+        end)
+        
+        -- Wait for buying to complete or timeout
+        while not bought and tick() - startTime < maxTime do
+            task.wait(0.05)
+        end
+        
+        if followConnection then followConnection:Disconnect() end
+        if spamConnection then spamConnection:Disconnect() end
+        
+        return bought
+    end
+
+    local function firePrompt(prompt, tries, key, holdOverride)
+        if not prompt or not prompt.Parent then return false end
+        tries = tries or 3
+        key = key or Enum.KeyCode.E
+        holdOverride = holdOverride or nil
+
+        for _ = 1, tries do
+            local ok = pcall(function()
+                local holdTime = holdOverride or tonumber(prompt.HoldDuration) or 0
+                if holdTime < 0.25 then holdTime = 0.25 end
+
+                pcall(function()
+                    prompt.RequiresLineOfSight = false
+                    prompt.MaxActivationDistance = math.max(prompt.MaxActivationDistance or 8, 15)
+                end)
+
+                VIM:SendKeyEvent(true, key, false, game)
+                task.wait(holdTime)
+                VIM:SendKeyEvent(false, key, false, game)
+                task.wait(0.12)
+            end)
+            if ok then return true end
+            task.wait(0.2)
+        end
+        return false
+    end
+
+    local function findPriceAndPurchasePrompt(model)
+        local part = model:FindFirstChild("Part") or model:FindFirstChild("HumanoidRootPart")
+        if not isBasePart(part) then return nil, nil, nil end
+
+        local price = math.huge
+        local info = part:FindFirstChild("Info")
+        if info then
+            local ao = info:FindFirstChild("AnimalOverhead")
+            local priceLabel = ao and ao:FindFirstChild("Price")
+            if priceLabel then
+                price = parsePrice(priceLabel.Text)
+            end
+        end
+
+        local purchasePrompt = nil
+        local pa = part:FindFirstChild("PromptAttachment")
+        if pa then
+            for _, d in ipairs(pa:GetChildren()) do
+                if d:IsA("ProximityPrompt") then
+                    local a = tostring(d.ActionText or ""):lower()
+                    if a:find("purchase") or a:find("buy") then
+                        purchasePrompt = d
+                        break
+                    end
+                end
+            end
+            if not purchasePrompt then
+                purchasePrompt = pa:FindFirstChildOfClass("ProximityPrompt")
+            end
+        end
+
+        return part, purchasePrompt, price
+    end
+
+    local function getMovingAnimals()
+        local list = {}
+        for _, m in ipairs(Workspace:GetChildren()) do
+            if m:IsA("Model") then
+                local part, prompt, price = findPriceAndPurchasePrompt(m)
+                if part and prompt and price and price < math.huge then
+                    table.insert(list, {model=m, part=part, prompt=prompt, price=price})
+                end
+            end
+        end
+        return list
+    end
+
+    local function bestAffordable()
+        local best, bestPrice = nil, -1
+        for _, entry in ipairs(getMovingAnimals()) do
+            local p = entry.price or 0
+            if cashValue and cashValue.Value and p > 0 and p <= cashValue.Value and p > bestPrice then
+                best = entry
+                bestPrice = p
+            end
+        end
+        return best
+    end
+
+    local function collectCoins(plot)
+        updateStatus("Collecting coins...")
+        local pods = plot and plot:FindFirstChild("AnimalPodiums")
+        if not pods then return end
+        
+        for _, pod in ipairs(pods:GetChildren()) do
+            local hit = pod:FindFirstChild("Claim") and pod.Claim:FindFirstChild("Hitbox")
+            if isBasePart(hit) then
+                local success = walkToDynamic(hit, 4, 10)
+                if success then
+                    task.wait(0.2)
+                end
+            end
+        end
+    end
+
+    local function podiumPrompt(pod)
+        local spawn = pod:FindFirstChild("Base") and pod.Base:FindFirstChild("Spawn")
+        local pa = spawn and spawn:FindFirstChild("PromptAttachment")
+        if pa then
+            for _, p in ipairs(pa:GetChildren()) do
+                if p:IsA("ProximityPrompt") then
+                    local a = tostring(p.ActionText or ""):lower()
+                    if a:find("sell") then
+                        return p
+                end
+            end
+        end
+            return pa:FindFirstChildOfClass("ProximityPrompt")
+        end
+        return nil
+    end
+    
+    local function podiumPrice(pod)
+        for _, d in ipairs(pod:GetDescendants()) do
+            if d.Name=="AnimalOverhead" then
+                local p = d:FindFirstChild("Price")
+                if p and p:IsA("TextLabel") then
+                    return parsePrice(p.Text)
+                end
+            end
+        end
+        return math.huge
+    end
+
+    local function sellCheapest(plot)
+        updateStatus("Selling cheapest...")
+        local pods = plot and plot:FindFirstChild("AnimalPodiums")
+        if not pods then return end
+        local entries = {}
+        for _, pod in ipairs(pods:GetChildren()) do
+            local pr = podiumPrice(pod)
+            local prompt = podiumPrompt(pod)
+            if prompt then
+                table.insert(entries, {pod=pod, price=pr, prompt=prompt})
+            end
+        end
+        table.sort(entries, function(a,b) return a.price < b.price end)
+        if #entries==0 then return end
+
+        local cheapest = entries[1].price
+        for _, e in ipairs(entries) do
+            if e.price==cheapest then
+                if walkToDynamic(e.prompt, 3, 30) then
+                    task.wait(0.5)
+                    firePrompt(e.prompt, 1, Enum.KeyCode.F, 3.5)
+                    task.wait(0.2)
+                end
+            end
+        end
+    end
+
+    local function hasRequired(plot)
+        local pods = plot and plot:FindFirstChild("AnimalPodiums")
+        if not pods then return false, false, false end
+        local hasGangster, hasTrippie = false, false
+        for _, pod in ipairs(pods:GetChildren()) do
+            for _, d in ipairs(pod:GetDescendants()) do
+                if d.Name=="AnimalOverhead" then
+                    local n = d:FindFirstChild("DisplayName") or d:FindFirstChild("Name")
+                    local t = n and n.Text or ""
+                    if t=="Trippi Troppi" then hasTrippie = true end
+                    if t=="Gangster Footera" then hasGangster = true end
+                end
+            end
+        end
+        updateChecklist("gangster", hasGangster)
+        updateChecklist("trippi", hasTrippie)
+        return hasGangster and hasTrippie, hasGangster, hasTrippie
+    end
+
+    local function rebirth()
+        local node = RS:FindFirstChild("Packages")
+        node = node and node:FindFirstChild("Net")
+        node = node and node:FindFirstChild("RF/Rebirth/RequestRebirth")
+        if node and node.InvokeServer then
+            pcall(function() node:InvokeServer() end)
+        end
+    end
+
+    -- Main Loop
+    updateStatus("Finding plot...")
+    local myPlot = ensureMyPlot()
+    task.wait(1)
+
+    updateStatus("Locking base...")
+    lockBase(myPlot)
+
+    updateStatus("Starting farm cycle...")
+
+    -- Initial collection to get starting cash
+    collectCoins(myPlot)
+    task.wait(1)
+
+    while true do
+        if not myPlot or not myPlot.Parent then
+            myPlot = ensureMyPlot()
+        end
+    
+        -- Lock base every 30-45 seconds
+        if tick() - lastBaseLockTime > math.random(30, 45) then
+            lockBase(myPlot)
+        end
+    
+        -- Check requirements continuously
+        local hasAll, hasGangster, hasTrippie = hasRequired(myPlot)
+    
+        if cashValue and cashValue.Value and cashValue.Value >= 1000000 then
+            updateStatus("Target reached! Preparing rebirth...")
+            
+            -- Sell all except required pets
+            while countOwned(myPlot) > 2 or (countOwned(myPlot) > 0 and not hasAll) do
+                updateStatus("Selling excess pets...")
+                sellCheapest(myPlot)
+                task.wait(1)
+                hasAll, hasGangster, hasTrippie = hasRequired(myPlot)
+            end
+    
+            -- Buy required pets if missing
+            while not hasAll do
+                updateStatus("Buying required pets...")
+                local animals = getMovingAnimals()
+                for _, entry in ipairs(animals) do
+                    local oh = entry.model:FindFirstChild("AnimalOverhead", true)
+                    local dn = oh and (oh:FindFirstChild("DisplayName") or oh:FindFirstChild("Name"))
+                    local name = dn and dn.Text or ""
+
+                    if (name == "Trippi Troppi" and not hasTrippie) or (name == "Gangster Footera" and not hasGangster) then
+                        if cashValue.Value >= entry.price then
+                            updateStatus("Buying " .. name .. "...")
+                            buyBrainrot(entry, myPlot)
+                            collectCoins(myPlot)
+                            task.wait(0.5)
+                        end
+                    end
+                end
+                task.wait(1)
+                hasAll, hasGangster, hasTrippie = hasRequired(myPlot)
+            end
+
+            updateStatus("Rebirthing...")
+            rebirth()
+            task.wait(3)
+            
+            -- Check if rebirth was successful
+            if Rebirths.Value >= 1 then
+                updateStatus("COMPLETE!")
+                if background then
+                    background.BackgroundColor3 = Color3.fromRGB(81, 255, 0)
+                end
+                statusLabel.Text = "Rebirth 1 has been completed on " .. player.Name
+                statusLabel.TextSize = 28
+                sendWebhook("Rebirth 1 Complete!", {
+                    { name = "Final Rebirths", value = tostring(Rebirths.Value), inline = true }
+                })
+                break
+            else
+                updateStatus("Rebirth failed, retrying...")
+                task.wait(2)
+            end
+        end
+
+        local owned = countOwned(myPlot)
+        
+        if owned >= 8 then
+            -- At 8 brainrots: collect coins then sell
+            collectCoins(myPlot)
+            task.wait(0.5)
+            sellCheapest(myPlot)
+            task.wait(1)
+        else
+            -- Less than 8: buy brainrot and collect coins after each purchase
+            local best = bestAffordable()
+            if best and isBasePart(best.part) and best.prompt then
+                updateStatus("Buying brainrot...")
+                local success = buyBrainrot(best, myPlot)
+                if success then
+                    collectCoins(myPlot)
+                end
+                task.wait(0.3)
+            else
+                -- No affordable brainrots, just collect coins
+                if cashValue and cashValue.Value and cashValue.Value <= 50 then
+                    collectCoins(myPlot)
+                    task.wait(1)
+                else
+                    task.wait(0.5)
+                end
+            end
+        end
+        task.wait(0.3)
+    end
+end
