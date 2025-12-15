@@ -539,15 +539,20 @@ if isRebirthOne then
         return success and response
     end
 
+    local totalHopAttempts = 0
+
     function AttemptServerTeleport()
-        for AttemptIndex = 1, 150 do
+        while true do
+            local currentJobId = game.JobId
             AvailableServers = GetAvailableServersList()
             if #AvailableServers == 0 then
+                print(string.format("[HOP] Uygun sunucu yok, cache reset. %.1fs bekleniyor", RetryDelaySeconds))
                 VisitedServersMap = {}
                 VisitedServersCount = 0
                 task.wait(RetryDelaySeconds)
                 continue
             end
+
             SelectedServerId = AvailableServers[math.random(1, #AvailableServers)]
             if not VisitedServersMap[SelectedServerId] then
                 VisitedServersMap[SelectedServerId] = true
@@ -561,6 +566,11 @@ if isRebirthOne then
                     VisitedServersCount = VisitedServersCount - 1
                 end
             end
+
+            totalHopAttempts = totalHopAttempts + 1
+            print(string.format("[HOP] Deneme #%d -> %s | available:%d cached:%d visited:%d current:%s",
+                totalHopAttempts, tostring(SelectedServerId), #AvailableServers, #ApiState.cachedServers, VisitedServersCount, tostring(currentJobId)))
+
             TeleportSuccess = pcall(function()
                 if queue_on_teleport and readfile then
                     ReadSuccess, TeleportScriptContent = pcall(function()
@@ -572,10 +582,15 @@ if isRebirthOne then
                 end
                 TeleportService:TeleportToPlaceInstance(AllowedPlaceId, SelectedServerId)
             end)
-            if TeleportSuccess then return true end
+
+            if TeleportSuccess then
+                print(string.format("[HOP] Teleport başarılı -> %s", tostring(SelectedServerId)))
+                return true
+            end
+
+            print(string.format("[HOP] Teleport başarısız, %.1fs sonra tekrar denenecek", RetryDelaySeconds))
             task.wait(RetryDelaySeconds)
         end
-        return false
     end
 
     -- ===============================
@@ -845,8 +860,11 @@ if isRebirthOne then
             end
             print("✅ [PET FINDER] Hop task başlıyor...")
             
-            -- Server hop
-            AttemptServerTeleport()
+            -- Server hop (kesintisiz deneme)
+            while true do
+                AttemptServerTeleport()
+                task.wait(0.1)
+            end
         end)
     end)
     
