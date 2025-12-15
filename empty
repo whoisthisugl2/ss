@@ -540,7 +540,7 @@ if isRebirthOne then
     end
 
     function AttemptServerTeleport()
-        for AttemptIndex = 1, 10 do
+        for AttemptIndex = 1, 50 do
             AvailableServers = GetAvailableServersList()
             if #AvailableServers == 0 then
                 VisitedServersMap = {}
