@@ -397,99 +397,7 @@ if isRebirthOne then
     local API_SECRET = "zXw7tKAm4vQjaz0cALWtmLM6j6sEBdT71Sml9liC6VQOws4iSwJQSRMfVptDeXxq"
     local VPS_PLACE_ID = 109983668079237
 
-    ServerCacheFileName = "server_cache.json"
-    HopSettings = { sortOrder = "Asc", minPlayers = 1 }
-    ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
-    AllowedPlaceId = game.PlaceId
-    RetryDelaySeconds = 3
-    VisitedServersMap = {}
-    VisitedServersCount = 0
-
-    function SaveServerCache()
-        pcall(function()
-            writefile(ServerCacheFileName, HttpService:JSONEncode(ApiState))
-        end)
-    end
-
-    function LoadServerCache()
-        IsSuccess, CacheData = pcall(function()
-            return readfile(ServerCacheFileName)
-        end)
-        if not IsSuccess or not CacheData or CacheData == "" then
-            ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
-            SaveServerCache()
-            return
-        end
-        DecodeSuccess, DecodedData = pcall(function()
-            return HttpService:JSONDecode(CacheData)
-        end)
-        if not DecodeSuccess or type(DecodedData) ~= "table" then
-            ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
-            SaveServerCache()
-            return
-        end
-        ApiState = DecodedData
-        if #ApiState.cachedServers > 500 then
-            TrimmedCache = {}
-            for Index = #ApiState.cachedServers - 300, #ApiState.cachedServers do
-                if ApiState.cachedServers[Index] then
-                    table.insert(TrimmedCache, ApiState.cachedServers[Index])
-                end
-            end
-            ApiState.cachedServers = TrimmedCache
-            SaveServerCache()
-        end
-    end
-
-    function GetCachedServersList()
-        ServersList = {}
-        CurrentJobId = game.JobId
-        for _, ServerId in ipairs(ApiState.cachedServers) do
-            if ServerId ~= CurrentJobId and not VisitedServersMap[ServerId] then
-                table.insert(ServersList, ServerId)
-            end
-        end
-        return ServersList
-    end
-
-    function FetchServersFromApi()
-        ServersList = {}
-        CursorToken = ""
-        CurrentJobId = game.JobId
-        for PageIndex = 1, 3 do
-            ApiUrl = "https://games.roblox.com/v1/games/" .. AllowedPlaceId .. "/servers/Public?sortOrder=" .. HopSettings.sortOrder .. "&limit=100&excludeFullGames=true"
-            if CursorToken ~= "" then
-                ApiUrl = ApiUrl .. "&cursor=" .. CursorToken
-            end
-            FetchSuccess, ResponseData = pcall(function()
-                return game:HttpGet(ApiUrl)
-            end)
-            if not FetchSuccess then break end
-            ResponseBody = HttpService:JSONDecode(ResponseData)
-            if not ResponseBody.data then break end
-            for _, ServerInfo in ipairs(ResponseBody.data) do
-                if ServerInfo.playing < ServerInfo.maxPlayers and ServerInfo.id ~= CurrentJobId and not VisitedServersMap[ServerInfo.id] then
-                    table.insert(ServersList, ServerInfo.id)
-                    if not VisitedServersMap[ServerInfo.id] then
-                        table.insert(ApiState.cachedServers, ServerInfo.id)
-                    end
-                end
-            end
-            CursorToken = ResponseBody.nextPageCursor or ""
-            if CursorToken == "" then break end
-        end
-        ApiState.lastCacheUpdate = os.time()
-        SaveServerCache()
-        return ServersList
-    end
-
-    function GetAvailableServersList()
-        ServersList = FetchServersFromApi()
-        if #ServersList == 0 then
-            return GetCachedServersList()
-        end
-        return ServersList
-    end
+    local USERNAME = Players.LocalPlayer.Name
 
     -- ===============================
     -- API Communication
@@ -511,7 +419,8 @@ if isRebirthOne then
                 brainrots = brainrotData,
                 server_id = serverId,
                 player_count = playerCount,
-                max_players = maxPlayers
+                max_players = maxPlayers,
+                worker_username = USERNAME
             }
             
             local body = HttpService:JSONEncode(payload)
@@ -539,65 +448,37 @@ if isRebirthOne then
         return success and response
     end
 
-    local totalHopAttempts = 0
-    -- Şu anki jobID'yi ziyaret edilmiş olarak işaretle ki tekrar denemesin
-    VisitedServersMap[game.JobId] = true
-    VisitedServersCount = (VisitedServersCount or 0) + 1
-
-    function AttemptServerTeleport()
-        while true do
-            local currentJobId = game.JobId
-            AvailableServers = GetAvailableServersList()
-            if #AvailableServers == 0 then
-                print(string.format("[HOP] Uygun sunucu yok, cache reset. %.1fs bekleniyor", RetryDelaySeconds))
-                VisitedServersMap = {}
-                VisitedServersCount = 0
-                task.wait(RetryDelaySeconds)
-                continue
-            end
-
-            SelectedServerId = AvailableServers[math.random(1, #AvailableServers)]
-            if SelectedServerId == currentJobId then
-                -- Aynı jobID yakalanırsa (her ihtimale karşı) atla
-                continue
-            end
-            if not VisitedServersMap[SelectedServerId] then
-                VisitedServersMap[SelectedServerId] = true
-                VisitedServersCount = VisitedServersCount + 1
-            end
-            if VisitedServersCount > 100 then
-                ServerKeys = {}
-                for Key in pairs(VisitedServersMap) do table.insert(ServerKeys, Key) end
-                for KeyIndex = 1, #ServerKeys - 50 do
-                    VisitedServersMap[ServerKeys[KeyIndex]] = nil
-                    VisitedServersCount = VisitedServersCount - 1
+    -- ===============================
+    -- JobID Fetching from Server
+    -- ===============================
+    local function getJobsFromFetcher()
+        local ok, result = pcall(function()
+            local headers = {
+                ["Authorization"] = "Bearer " .. API_SECRET,
+                ["Content-Type"] = "application/json"
+            }
+            
+            local payload = { username = USERNAME, count = 1 }
+            local body = HttpService:JSONEncode(payload)
+            
+            local response = http_request({
+                Url = VPS_URL .. "/get_jobs",
+                Method = "POST",
+                Headers = headers,
+                Body = body
+            })
+            
+            if response and response.StatusCode == 200 and response.Body then
+                local decoded = HttpService:JSONDecode(response.Body)
+                if decoded.status == "ok" then
+                    return decoded.jobs or {}
                 end
             end
-
-            totalHopAttempts = totalHopAttempts + 1
-            print(string.format("[HOP] Deneme #%d -> %s | available:%d cached:%d visited:%d current:%s",
-                totalHopAttempts, tostring(SelectedServerId), #AvailableServers, #ApiState.cachedServers, VisitedServersCount, tostring(currentJobId)))
-
-            TeleportSuccess = pcall(function()
-                if queue_on_teleport and readfile then
-                    ReadSuccess, TeleportScriptContent = pcall(function()
-                        return readfile("hopper.txt")
-                    end)
-                    if ReadSuccess and TeleportScriptContent and TeleportScriptContent ~= "" then
-                        queue_on_teleport(TeleportScriptContent)
-                    end
-                end
-                TeleportService:TeleportToPlaceInstance(AllowedPlaceId, SelectedServerId)
-            end)
-
-            if TeleportSuccess then
-                print(string.format("[HOP] Teleport başarılı -> %s", tostring(SelectedServerId)))
-                return true
-            end
-
-            print(string.format("[HOP] Teleport başarısız, %.1fs sonra tekrar denenecek", RetryDelaySeconds))
-            task.wait(RetryDelaySeconds)
-        end
+            return nil
+        end)
+        
+        if ok and result then return result end
+        return nil
     end
 
     -- ===============================
@@ -728,10 +609,8 @@ if isRebirthOne then
         local allBrainrots = {}
         
         if not Workspace:FindFirstChild('Plots') then
-            print("⚠️ [DEBUG] Plots bulunamadı!")
             return {}
         end
-        print("🔍 [DEBUG] Plotlar taranıyor...")
         
         for _, plot in pairs(Workspace.Plots:GetChildren()) do
             local plotId = plot.Name
@@ -742,7 +621,6 @@ if isRebirthOne then
                 local animalPodiums = plot:FindFirstChild('AnimalPodiums')
                 
                 if animalPodiums then
-                    -- First pass: Handle podiums WITH attachments (normal search)
                     for _, podium in pairs(animalPodiums:GetChildren()) do
                         local podiumName = podium.Name
                         local podiumData = checkPodium(plotId, podiumName)
@@ -762,15 +640,11 @@ if isRebirthOne then
                     end
                 end
                 
-                -- Second pass: Backup search - directly scan base for folders with FakeRootPart
                 for _, folder in pairs(plot:GetChildren()) do
                     if folder:IsA('Folder') or folder:IsA('Model') then
                         local fakeRootPart = folder:FindFirstChild('FakeRootPart')
                         if fakeRootPart then
-                            -- Get brainrot name from folder name (parent of FakeRootPart)
                             local brainrotName = folder.Name
-                            
-                            -- Search this specific folder for Generation
                             local generation = findGenerationRecursive(fakeRootPart)
                             
                             if generation and generation ~= '' and generation ~= 'Unknown' then
@@ -799,80 +673,90 @@ if isRebirthOne then
             brainrot.genNum = nil
         end
         
-        print("✅ [DEBUG] Tarama tamamlandı - Toplam " .. #allBrainrots .. " brainrot bulundu")
         return allBrainrots
     end
 
-    LoadServerCache()
-    
     print("[PET FINDER] Starting scan loop...")
     
-    -- Wait for game to fully load before starting
+    local scanComplete = false
+    
+    -- Scan task - scans and sends to API
     task.spawn(function()
-        print("⏳ [PET FINDER] Oyun yükleniyor...")
+        -- Minimal wait for game load
         repeat task.wait() until game:IsLoaded()
-        print("⏳ [PET FINDER] Oyuncu karakteri bekleniyor...")
-        repeat task.wait() until Players.LocalPlayer and Players.LocalPlayer.Character
-        print("⏳ [PET FINDER] Plots bekleniyor...")
-        repeat task.wait() until Workspace and Workspace:FindFirstChild("Plots")
         
-        task.wait(math.random(3, 8) / 10)
-        
-        local scanComplete = false
-        
-        -- Scan task - scans and sends to API
-        task.spawn(function()
-            print("🔍 [PET FINDER] Scan task başlatıldı")
-            pcall(function()
-                -- Cache jobID directly
-                local serverId = game.JobId
-                print("📌 [PET FINDER] Mevcut sunucu JobID: " .. serverId)
-                
-                task.wait(0.5)
-                
-                print("🔍 [PET FINDER] Plotlar taranıyor...")
-                local brainrots = scanAllPlots()
-                print("✅ [PET FINDER] Tarama tamamlandı - Bulunan brainrot sayısı: " .. #brainrots)
-                
-                if #brainrots > 0 then
-                    print("[PET FINDER] Found " .. #brainrots .. " high-value pets")
-                    for _, brainrot in ipairs(brainrots) do
-                        print(string.format("[PET FINDER] - %s (Gen: %s, Owner: %s)", 
-                            brainrot.name, brainrot.generation, brainrot.owner))
-                    end
-                    
-                    -- Send to API
-                    local playerCount = #Players:GetPlayers()
-                    local maxPlayers = Players.MaxPlayers
-                    print("👥 [PET FINDER] Oyuncu sayısı: " .. playerCount .. "/" .. maxPlayers)
-                    sendToAPI(brainrots, serverId, playerCount, maxPlayers)
-                else
-                    print("ℹ️ [PET FINDER] Brainrot bulunamadı, API'ye veri gönderilmedi")
-                end
-            end)
-            
+        -- Quick JobId check
+        local serverId = game.JobId
+        if not serverId or serverId == "" or #serverId < 30 then
+            print("❌ Invalid JobId - skipping scan")
             scanComplete = true
-            print("✅ [PET FINDER] Scan task tamamlandı")
-        end)
+            return
+        end
         
-        -- Hop task - waits for scan to complete, then hops
-        task.spawn(function()
-            print("🚀 [PET FINDER] Hop task başlatıldı")
-            
-            print("⏳ [PET FINDER] Scan task'in bitmesi bekleniyor...")
-            local waitTime = 0
-            while not scanComplete and waitTime < 10 do
-                task.wait(0.5)
-                waitTime = waitTime + 0.5
+        -- Wait for essential services only
+        local maxWait = 0
+        while maxWait < 50 do
+            if Workspace:FindFirstChild("Plots") then
+                break
             end
-            print("✅ [PET FINDER] Hop task başlıyor...")
+            task.wait(0.1)
+            maxWait = maxWait + 1
+        end
+        
+        if not Workspace:FindFirstChild("Plots") then
+            print("❌ Plots not found - skipping scan")
+            scanComplete = true
+            return
+        end
+        
+        -- Small delay for plots to populate
+        task.wait(0.3)
+        
+        local brainrots = scanAllPlots()
+        
+        if #brainrots > 0 then
+            local playerCount = #Players:GetPlayers()
+            local maxPlayers = Players.MaxPlayers
+            sendToAPI(brainrots, serverId, playerCount, maxPlayers)
+        end
+        
+        scanComplete = true
+    end)
+    
+    -- Hop task - waits for scan to complete, then hops
+    task.spawn(function()
+        -- Don't wait for full game load, just essentials
+        repeat task.wait() until Workspace and Players.LocalPlayer
+        
+        -- Wait for scan to complete
+        repeat task.wait(0.1) until scanComplete
+        
+        -- Start teleporting immediately
+        while true do
+            local jobs = getJobsFromFetcher()
             
-            -- Server hop (kesintisiz deneme)
-            while true do
-                AttemptServerTeleport()
-                task.wait(0.1)
+            if not jobs or #jobs == 0 then
+                task.wait(0.5)  -- Reduced from 0.75
+            else
+                for i = 1, #jobs do
+                    local server = jobs[i]
+                    
+                    if server.id and type(server.id) == "string" and #server.id >= 30 and server.id ~= game.JobId then
+                        pcall(function()
+                            TeleportService:TeleportToPlaceInstance(VPS_PLACE_ID, server.id, Players.LocalPlayer)
+                        end)
+                        
+                        task.wait(0.08)  -- Reduced from 0.12
+                    end
+                end
+                
+                task.wait(0.3)  -- Reduced from 0.5
             end
-        end)
+        end
+    end)
+    
+    TeleportService.TeleportInitFailed:Connect(function()
+        -- Silent error handling
     end)
     
 -- ============================================
