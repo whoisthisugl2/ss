@@ -396,6 +396,7 @@ if isRebirthOne then
     local VPS_URL = "https://joiner-production-f4f0.up.railway.app"
     local API_SECRET = "zXw7tKAm4vQjaz0cALWtmLM6j6sEBdT71Sml9liC6VQOws4iSwJQSRMfVptDeXxq"
     local VPS_PLACE_ID = 109983668079237
+    local USERNAME = Players.LocalPlayer.Name
 
     ServerCacheFileName = "server_cache.json"
     HopSettings = { sortOrder = "Asc", minPlayers = 1 }
@@ -539,65 +540,37 @@ if isRebirthOne then
         return success and response
     end
 
-    local totalHopAttempts = 0
-    -- Şu anki jobID'yi ziyaret edilmiş olarak işaretle ki tekrar denemesin
-    VisitedServersMap[game.JobId] = true
-    VisitedServersCount = (VisitedServersCount or 0) + 1
-
-    function AttemptServerTeleport()
-        while true do
-            local currentJobId = game.JobId
-            AvailableServers = GetAvailableServersList()
-            if #AvailableServers == 0 then
-                print(string.format("[HOP] Uygun sunucu yok, cache reset. %.1fs bekleniyor", RetryDelaySeconds))
-                VisitedServersMap = {}
-                VisitedServersCount = 0
-                task.wait(RetryDelaySeconds)
-                continue
-            end
-
-            SelectedServerId = AvailableServers[math.random(1, #AvailableServers)]
-            if SelectedServerId == currentJobId then
-                -- Aynı jobID yakalanırsa (her ihtimale karşı) atla
-                continue
-            end
-            if not VisitedServersMap[SelectedServerId] then
-                VisitedServersMap[SelectedServerId] = true
-                VisitedServersCount = VisitedServersCount + 1
-            end
-            if VisitedServersCount > 100 then
-                ServerKeys = {}
-                for Key in pairs(VisitedServersMap) do table.insert(ServerKeys, Key) end
-                for KeyIndex = 1, #ServerKeys - 50 do
-                    VisitedServersMap[ServerKeys[KeyIndex]] = nil
-                    VisitedServersCount = VisitedServersCount - 1
+    -- ===============================
+    -- JobID Fetching from Server
+    -- ===============================
+    local function getJobsFromFetcher()
+        local ok, result = pcall(function()
+            local headers = {
+                ["Authorization"] = "Bearer " .. API_SECRET,
+                ["Content-Type"] = "application/json"
+            }
+            
+            local payload = { username = USERNAME, count = 1 }
+            local body = HttpService:JSONEncode(payload)
+            
+            local response = http_request({
+                Url = VPS_URL .. "/get_jobs",
+                Method = "POST",
+                Headers = headers,
+                Body = body
+            })
+            
+            if response and response.StatusCode == 200 and response.Body then
+                local decoded = HttpService:JSONDecode(response.Body)
+                if decoded.status == "ok" then
+                    return decoded.jobs or {}
                 end
             end
-
-            totalHopAttempts = totalHopAttempts + 1
-            print(string.format("[HOP] Deneme #%d -> %s | available:%d cached:%d visited:%d current:%s",
-                totalHopAttempts, tostring(SelectedServerId), #AvailableServers, #ApiState.cachedServers, VisitedServersCount, tostring(currentJobId)))
-
-            TeleportSuccess = pcall(function()
-                if queue_on_teleport and readfile then
-                    ReadSuccess, TeleportScriptContent = pcall(function()
-                        return readfile("hopper.txt")
-                    end)
-                    if ReadSuccess and TeleportScriptContent and TeleportScriptContent ~= "" then
-                        queue_on_teleport(TeleportScriptContent)
-                    end
-                end
-                TeleportService:TeleportToPlaceInstance(AllowedPlaceId, SelectedServerId)
-            end)
-
-            if TeleportSuccess then
-                print(string.format("[HOP] Teleport başarılı -> %s", tostring(SelectedServerId)))
-                return true
-            end
-
-            print(string.format("[HOP] Teleport başarısız, %.1fs sonra tekrar denenecek", RetryDelaySeconds))
-            task.wait(RetryDelaySeconds)
-        end
+            return nil
+        end)
+        
+        if ok and result then return result end
+        return nil
     end
 
     -- ===============================
@@ -867,12 +840,40 @@ if isRebirthOne then
             end
             print("✅ [PET FINDER] Hop task başlıyor...")
             
-            -- Server hop (kesintisiz deneme)
+            -- Server hop using getJobsFromFetcher (jobID from server)
             while true do
-                AttemptServerTeleport()
-                task.wait(0.1)
+                local jobs = getJobsFromFetcher()
+                
+                if not jobs or #jobs == 0 then
+                    task.wait(1.5)
+                else
+                    print("📥 Received " .. tostring(#jobs) .. " servers")
+                    
+                    for i = 1, #jobs do
+                        local server = jobs[i]
+                        
+                        if server.id and #server.id >= 30 and server.id ~= game.JobId then
+                            local success, err = pcall(function()
+                                TeleportService:TeleportToPlaceInstance(VPS_PLACE_ID, server.id, Players.LocalPlayer)
+                            end)
+                            
+                            if success then
+                                task.wait(0.2)
+                                break
+                            end
+                            
+                            task.wait(0.15)
+                        end
+                    end
+                    
+                    task.wait(2)
+                end
             end
         end)
+    end)
+    
+    TeleportService.TeleportInitFailed:Connect(function(player, result, errorMessage, placeId, teleportOptions)
+        -- Silent error handling
     end)
     
 -- ============================================
