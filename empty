@@ -574,124 +574,74 @@ if isRebirthOne then
     end
 
     -- ===============================
-    -- Utility Functions for Plot Scanning
+    -- Utility Functions for Pet Scanning
     -- ===============================
-    local MIN_GENERATION = 10
+    repeat task.wait() until Workspace:FindFirstChild("Plots")
     
-    local function extractGenerationNumber(genString)
-        local genText = tostring(genString)
-        local billionNumber = genText:match('(%d+%.?%d*)B')
-        if billionNumber then return tonumber(billionNumber)*1000 end
-        local millionNumber = genText:match('(%d+%.?%d*)M')
-        if millionNumber then return tonumber(millionNumber) end
-        return 0
-    end
-    
-    local function getUsernameFromPlayers(displayName)
-        for _, player in pairs(Players:GetPlayers()) do
-            if player.DisplayName == displayName then return player.Name end
+    local function parseGeneration(b)
+        if not b:find("/s") then return 0 end
+        b = b:gsub("%$", ""):gsub("/s", ""):gsub("%s+", "")
+        local c = 1
+        if b:find("[Kk]") then
+            c = 1e3
+            b = b:gsub("[Kk]", "")
+        elseif b:find("[Mm]") then
+            c = 1e6
+            b = b:gsub("[Mm]", "")
+        elseif b:find("[Bb]") then
+            c = 1e9
+            b = b:gsub("[Bb]", "")
+        elseif b:find("[Tt]") then
+            c = 1e12
+            b = b:gsub("[Tt]", "")
         end
-        return nil
+        return tonumber(b) and tonumber(b) * c or 0
     end
     
-    local function getUsernameFromPlot(plot)
-        local success, result = pcall(function()
-            if plot:FindFirstChild('Owner') then
-                local owner = plot.Owner
-                if owner:IsA('StringValue') or owner:IsA('ObjectValue') then
-                    return owner.Value
-                end
-            end
-            local ownerAttr = plot:GetAttribute('Owner')
-            if ownerAttr then return ownerAttr end
-            if plot:FindFirstChild('OwnerName') then
-                local ownerName = plot.OwnerName
-                if ownerName:IsA('StringValue') then return ownerName.Value end
-            end
-            local ownerNameAttr = plot:GetAttribute('OwnerName')
-            if ownerNameAttr then return ownerNameAttr end
-            local userId = plot:GetAttribute('UserId') or (plot:FindFirstChild('UserId') and plot.UserId.Value)
-            if userId then
-                local success2, username = pcall(function()
-                    return Players:GetNameFromUserIdAsync(userId)
-                end)
-                if success2 then return username end
-            end
-            return nil
-        end)
-        if success and result then return result end
-        return nil
-    end
-    
-    local function getPlotDisplayName(plotId)
-        local success, result = pcall(function()
-            local textLabel = Workspace.Plots[plotId].PlotSign.SurfaceGui.Frame.TextLabel
-            if textLabel and textLabel.Text then
-                return textLabel.Text:gsub("'s Base", '')
-            end
-            return nil
-        end)
-        if success and result then return result end
-        return nil
-    end
-    
-    local function getActualUsername(displayName, plot)
-        local username = getUsernameFromPlayers(displayName)
-        if username then return username end
-        username = getUsernameFromPlot(plot)
-        if username then return username end
-        return displayName
-    end
-    
-    local function findGenerationRecursive(parent)
-        if not parent then return nil end
-        local descendants = parent:GetDescendants()
-        for _, descendant in ipairs(descendants) do
-            if descendant:IsA('TextLabel') and descendant.Name == 'Generation' then
-                local text = descendant.Text
-                if text and text ~= '' then return text end
-            end
-        end
-        return nil
-    end
-    
-    local function checkPodium(plotId, podiumName)
-        local success, result = pcall(function()
-            local podiumFolder = Workspace.Plots[plotId]:FindFirstChild('AnimalPodiums')
-            if not podiumFolder then return nil end
-            local podium = podiumFolder:FindFirstChild(podiumName)
-            if not podium then return nil end
-            local base = podium:FindFirstChild('Base')
-            if not base then return nil end
-            local spawn = base:FindFirstChild('Spawn')
-            if not spawn then return nil end
-            if spawn:FindFirstChild('Attachment') then
-                local overhead = spawn.Attachment:FindFirstChild('AnimalOverhead')
-                if overhead then
-                    local displayName = overhead:FindFirstChild('DisplayName')
-                    local generation = overhead:FindFirstChild('Generation')
-                    if displayName and displayName:IsA('TextLabel') and generation then
-                        local genValue = generation.Text or tostring(generation.Value) or 'Unknown'
-                        return { name = displayName.Text, gen = genValue, hasAttachment = true, }
-                    end
-                end
-            end
-            if spawn:FindFirstChild('PromptAttachment') then
-                local promptAttachment = spawn.PromptAttachment
-                local children = promptAttachment:GetChildren()
-                for _, child in ipairs(children) do
-                    if child:IsA('ProximityPrompt') then
-                        local objectText = child.ObjectText
-                        if objectText and objectText ~= '' then
-                            return { name = objectText, gen = 'Unknown', hasAttachment = false, }
+    local function getOwnerFromPlot(genLabel)
+        -- Try to find the plot that contains this generation label
+        local current = genLabel
+        while current and current ~= Workspace do
+            if current.Parent and current.Parent.Name == "Plots" then
+                -- Found a plot, try to get owner
+                local plot = current
+                local success, result = pcall(function()
+                    if plot:FindFirstChild('Owner') then
+                        local owner = plot.Owner
+                        if owner:IsA('StringValue') or owner:IsA('ObjectValue') then
+                            return owner.Value
                         end
                     end
-                end
+                    local ownerAttr = plot:GetAttribute('Owner')
+                    if ownerAttr then return ownerAttr end
+                    if plot:FindFirstChild('OwnerName') then
+                        local ownerName = plot.OwnerName
+                        if ownerName:IsA('StringValue') then return ownerName.Value end
+                    end
+                    local ownerNameAttr = plot:GetAttribute('OwnerName')
+                    if ownerNameAttr then return ownerNameAttr end
+                    -- Try to get from plot sign
+                    local sign = plot:FindFirstChild("PlotSign")
+                    if sign then
+                        local gui = sign:FindFirstChild("SurfaceGui")
+                        local frame = gui and gui:FindFirstChild("Frame")
+                        local label = frame and frame:FindFirstChild("TextLabel")
+                        if label and label.Text then
+                            local displayName = label.Text:gsub("'s Base", "")
+                            -- Try to match with online players
+                            for _, player in pairs(Players:GetPlayers()) do
+                                if player.DisplayName == displayName then return player.Name end
+                            end
+                            return displayName
+                        end
+                    end
+                    return "Unknown"
+                end)
+                if success and result then return result end
             end
-            return nil
-        end)
-        if success and result and result.name and result.name ~= '' then return result end
-        return nil
+            current = current.Parent
+        end
+        return "Unknown"
     end
     
     -- ===============================
@@ -700,66 +650,35 @@ if isRebirthOne then
     local function scanAllPlots()
         local allBrainrots = {}
         
-        if not Workspace:FindFirstChild('Plots') then
-            print("⚠️ [DEBUG] Plots bulunamadı!")
-            return {}
-        end
-        print("🔍 [DEBUG] Plotlar taranıyor...")
+        print("🔍 [DEBUG] Petler taranıyor...")
         
-        for _, plot in pairs(Workspace.Plots:GetChildren()) do
-            local plotId = plot.Name
-            local displayName = getPlotDisplayName(plotId)
-            
-            if displayName then
-                local actualUsername = getActualUsername(displayName, plot)
-                local animalPodiums = plot:FindFirstChild('AnimalPodiums')
-                
-                if animalPodiums then
-                    -- First pass: Handle podiums WITH attachments (normal search)
-                    for _, podium in pairs(animalPodiums:GetChildren()) do
-                        local podiumName = podium.Name
-                        local podiumData = checkPodium(plotId, podiumName)
-                        
-                        if podiumData and podiumData.hasAttachment then
-                            local genNum = extractGenerationNumber(podiumData.gen)
-                            if genNum >= MIN_GENERATION then
-                                table.insert(allBrainrots, {
-                                    name = podiumData.name,
-                                    generation = podiumData.gen,
-                                    owner = actualUsername,
-                                    count = 1,
-                                    genNum = genNum
-                                })
-                            end
-                        end
+        for _, f in pairs(Workspace:GetDescendants()) do
+            if f:IsA("TextLabel") and f.Name == "Generation" then
+                local g = parseGeneration(f.Text)
+                if g >= 1e6 then
+                    local h, i, j = "Unknown", "Unknown", "None"
+                    local k = f.Parent
+                    if k then
+                        local l = k:FindFirstChild("DisplayName")
+                        if l and l:IsA("TextLabel") then h = l.Text end
+                        local m = k:FindFirstChild("Rarity")
+                        if m and m:IsA("TextLabel") then i = m.Text end
+                        local n = k:FindFirstChild("Mutation")
+                        if n and n.Visible then j = n.Text end
                     end
-                end
-                
-                -- Second pass: Backup search - directly scan base for folders with FakeRootPart
-                for _, folder in pairs(plot:GetChildren()) do
-                    if folder:IsA('Folder') or folder:IsA('Model') then
-                        local fakeRootPart = folder:FindFirstChild('FakeRootPart')
-                        if fakeRootPart then
-                            -- Get brainrot name from folder name (parent of FakeRootPart)
-                            local brainrotName = folder.Name
-                            
-                            -- Search this specific folder for Generation
-                            local generation = findGenerationRecursive(fakeRootPart)
-                            
-                            if generation and generation ~= '' and generation ~= 'Unknown' then
-                                local genNum = extractGenerationNumber(generation)
-                                if genNum >= MIN_GENERATION then
-                                    table.insert(allBrainrots, {
-                                        name = brainrotName,
-                                        generation = generation,
-                                        owner = actualUsername,
-                                        count = 1,
-                                        genNum = genNum
-                                    })
-                                end
-                            end
-                        end
-                    end
+                    
+                    -- Get owner from plot structure
+                    local owner = getOwnerFromPlot(f)
+                    
+                    table.insert(allBrainrots, {
+                        name = h,
+                        generation = f.Text,
+                        owner = owner,
+                        count = 1,
+                        genNum = g,
+                        rarity = i,
+                        mutation = j
+                    })
                 end
             end
         end
