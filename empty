@@ -1,329 +1,43 @@
-setfpscap(10)
-settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-game:GetService("UserInputService").MouseIconEnabled = false
+-- Teleport Bypass Loader
+-- Execute IMMEDIATELY - don't wait for game to load
+local tpService = cloneref(game:GetService("TeleportService"))
+tpService:SetTeleportGui(tpService)
+print("✅ [BYPASS] TeleportGui set IMMEDIATELY - bypass active!")
 
-local GRAPHICS_FFLAGS = {
-    -- Core Rendering
-    ["FFlagDebugForceFutureIsBrightPhase3"] = "True",
-    ["FIntDebugForceMSAASamples"] = "1",
-    ["FIntTerrainArraySliceSize"] = "0",
-    ["DFFlagDisableDPIScale"] = "True",
-    ["FIntRenderShadowIntensity"] = "0",
-    ["FFlagDisablePostFx"] = "True",
-    ["FFlagDebugGraphicsPreferD3D11FL10"] = "True",
-    ["FFlagDebugGraphicsPreferD3D11"] = "True",
-    ["DFFlagDebugRenderForceTechnologyVoxel"] = "True",
-    ["FFlagDebugGraphicsPreferVulkan"] = "True",
-    ["FFlagDebugGraphicsPreferOpenGL"] = "True",
-    ["FFlagDebugRenderingSetDeterministic"] = "False",
-    
-    -- Texture Quality (LOW)
-    ["DFIntTextureQualityOverride"] = "0",
-    ["DFFlagTextureQualityOverrideEnabled"] = "True",
-    ["DFIntPerformanceControlTextureQualityBestUtility"] = "-1",
-    ["FIntUITextureMaxRenderTextureSize"] = "1024",
-    ["FIntTerrainOTAMaxTextureSize"] = "1024",
-    ["FFlagRenderGpuTextureCompressor"] = "True",
-    ["FFlagPreloadTextureItemsOption4"] = "True",
-    
-    -- Shadows & Lighting (DISABLED)
-    ["FIntRenderShadowmapBias"] = "0",
-    ["FIntRenderLocalLightUpdatesMin"] = "1",
-    ["FIntRenderLocalLightUpdatesMax"] = "1",
-    ["FFlagNewLightAttenuation"] = "True",
-    ["FFlagDebugLightGridShowChunks"] = "False",
-    ["FFlagFastGPULightCulling3"] = "True",
-    ["FFlagDebugSkyGray"] = "True",
-    
-    -- Grass & Terrain (DISABLED)
-    ["FIntRenderGrassHeightScaler"] = "0",
-    ["FIntRenderGrassDetailStrands"] = "0",
-    ["FIntFRMMinGrassDistance"] = "0",
-    ["FIntFRMMaxGrassDistance"] = "0",
-    
-    -- LOD (Level of Detail) - MINIMAL
-    ["DFIntCSGLevelOfDetailSwitchingDistance"] = "1",
-    ["DFIntCSGLevelOfDetailSwitchingDistanceL12"] = "1",
-    ["DFIntCSGLevelOfDetailSwitchingDistanceL23"] = "1",
-    ["DFIntCSGLevelOfDetailSwitchingDistanceL34"] = "1",
-    
-    -- Frame Rate & Performance
-    ["DFIntTaskSchedulerTargetFps"] = "69420",
-    ["FFlagTaskSchedulerLimitTargetFpsTo2402"] = "False",
-    ["FFlagGameBasicSettingsFramerateCap5"] = "True",
-    ["FIntRuntimeMaxNumOfThreads"] = "2400",
-    ["FIntTaskSchedulerThreadMin"] = "3",
-    
-    -- Memory & Cache
-    ["FIntDefaultMeshCacheSizeMB"] = "256",
-    ["FIntMeshContentProviderForceCacheSize"] = "268435456",
-    ["DFIntUserIdPlayerNameCacheSize"] = "33554432",
-    ["FIntEmotesAnimationsPerPlayerCacheSize"] = "16777216",
-    ["DFIntHttpCurlConnectionCacheSize"] = "134217728",
-    
-    -- Animation
-    ["DFIntMaxFrameBufferSize"] = "4",
-    ["FFlagAnimationClipMemCacheEnabled"] = "True",
-    
-    -- UI & Display
-    ["FIntFontSizePadding"] = "4",
-    ["FFlagHandleAltEnterFullscreenManually"] = "False",
-    ["FIntFullscreenTitleBarTriggerDelayMillis"] = "3600000",
-    ["FFlagCoreGuiTypeSelfViewPresent"] = "False",
-    ["FFlagPreloadAllFonts"] = "True",
-    
-    -- Network Optimizations (Graphics-related)
-    ["FFlagOptimizeNetwork"] = "True",
-    ["FFlagOptimizeNetworkRouting"] = "True",
-    ["FFlagOptimizeNetworkTransport"] = "True",
-    ["DFIntOptimizePingThreshold"] = "50",
-    ["DFIntConnectionMTUSize"] = "900",
-    ["DFIntRakNetMtuValue1InBytes"] = "1280",
-    ["DFIntRakNetMtuValue2InBytes"] = "1240",
-    ["DFIntRakNetMtuValue3InBytes"] = "1200",
-    
-    -- Telemetry & Debugging (DISABLED)
-    ["DFFlagEnableHardwareTelemetry"] = "False",
-    ["FIntBootstrapperTelemetryReportingHundredthsPercentage"] = "0",
-    ["DFFlagSimReportCPUInfo"] = "False",
-    ["FFlagDebugDisableTelemetryV2Stat"] = "True",
-    ["FFlagDebugDisableTelemetryPoint"] = "True",
-    ["FFlagDebugDisableTelemetryV2Counter"] = "True",
-    ["FFlagDebugDisableTelemetryEventIngest"] = "True",
-    ["FFlagDebugDisableTelemetryEphemeralStat"] = "True",
-    ["FFlagDebugDisableTelemetryV2Event"] = "True",
-    ["FFlagDebugDisableTelemetryEphemeralCounter"] = "True",
-    ["DFFlagEnableGCapsHardwareTelemetry"] = "False",
-    ["DFIntHardwareTelemetryHundredthsPercent"] = "0",
-    ["DFIntLightstepHTTPTransportHundredthsPercent2"] = "0",
-    ["DFFlagEnableLightstepReporting2"] = "False",
-    ["DFFlagAudioDeviceTelemetry"] = "False",
-    ["DFFlagGpuVsCpuBoundTelemetry"] = "False",
-    ["DFFlagEnableFmodErrorsTelemetry"] = "False",
-    ["FFlagEnableSoundTelemetry"] = "False",
-    ["DFIntReportRecordingDeviceInfoRateHundredthsPercentage"] = "0",
-    ["DFIntReportOutputDeviceInfoRateHundredthsPercentage"] = "0",
-    ["DFIntGoogleAnalyticsLoadPlayerHundredth"] = "0",
-    ["FFlagDebugDisplayFPS"] = "False",
-    
-    -- Menu & UI Optimization
-    ["FFlagEnableInGameMenuChrome"] = "True",
-    ["FFlagEnableInGameMenuV3"] = "True",
-    ["FFlagEnableInGameMenuModernization"] = "True",
-    ["FFlagEnableInGameMenuControls"] = "True",
-    ["FFlagEnableMenuControlsABTest"] = "False",
-    ["FFlagEnableMenuModernizationABTest"] = "False",
-    ["FFlagEnableMenuModernizationABTest2"] = "False",
-    ["FFlagEnableInGameMenuChromeABTest3"] = "False",
-    ["FFlagEnableV3MenuABTest3"] = "False",
-    ["FFlagTopBarUseNewBadge"] = "True",
-    ["FFlagLuaAppSystemBar"] = "False",
-    ["FFlagLuaAppExitModal2"] = "False",
-    ["FFlagLuaAppExitModalDoNotShow"] = "True",
-    ["FFlagInGameMenuV1FullScreenTitleBar"] = "False",
-    ["FFlagDisableNewIGMinDUA"] = "True",
-    ["FStringInGameMenuChromeForcedUserIds"] = "1353919681",
-    
-    -- Misc Performance
-    ["FFlagFixGraphicsQuality"] = "True",
-    ["FFlagMSRefactor5"] = "False",
-    ["FFlagGpuGeometryManager7"] = "True",
-    ["FFlagBatchAssetApi"] = "True",
-    ["DFFlagBatchAssetApiNoFallbackOnFail"] = "False",
-    ["DFFlagDebugPauseVoxelizer"] = "True",
-    ["FFlagAdServiceEnabled"] = "False",
-    ["FFlagReconnectDisabled"] = "True",
-    ["FFlagDontCreatePingJob"] = "True",
-    ["FFlagEnableQuickGameLaunch"] = "False",
-    
-    -- Analytics Opt-Out
-    ["DFStringRobloxAnalyticsSubDomain"] = "opt-out",
-    ["DFStringAltTelegrafHTTPTransportUrl"] = "http://opt-out.roblox.com",
-    ["FStringErrorUploadToBacktraceBaseUrl"] = "http://opt-out.roblox.com",
-    ["DFStringHttpPointsReporterUrl"] = "http://opt-out.roblox.com",
-    ["FStringPerformanceSendMeasurementAPISubdomain"] = "opt-out",
-    ["DFStringAltHttpPointsReporterUrl"] = "http://opt-out.roblox.com",
-    ["DFStringCrashUploadToBacktraceBaseUrl"] = "http://opt-out.roblox.com",
-    ["DFStringAnalyticsEventStreamUrlEndpoint"] = "opt-out",
-    ["DFStringTelegrafHTTPTransportUrl"] = "http://opt-out.roblox.com",
-    ["DFStringRobloxAnalyticsURL"] = "http://opt-out.roblox.com",
-    
-    -- Network Performance (Advanced)
-    ["DFIntNetworkPrediction"] = "120",
-    ["DFIntNetworkLatencyTolerance"] = "1",
-    ["DFIntPlayerNetworkUpdateQueueSize"] = "20",
-    ["DFIntPlayerNetworkUpdateRate"] = "60",
-    ["DFIntServerTickRate"] = "60",
-    ["DFIntServerPhysicsUpdateRate"] = "60",
-    ["FFlagOptimizeServerTickRate"] = "True",
-    ["DFFlagRakNetUseSlidingWindow4"] = "True",
-    ["FIntRakNetDatagramMessageIdArrayLength"] = "1024",
-    ["FIntRakNetResendBufferArrayLength"] = "1024",
-    ["DFIntRakNetNakResendDelayMs"] = "10",
-    ["DFIntRakNetNakResendDelayMsMax"] = "100",
-    ["DFIntRakNetNakResendDelayRttPercent"] = "50",
-    ["DFIntRakNetResendRttMultiple"] = "1",
-    ["DFIntRaknetBandwidthPingSendEveryXSeconds"] = "1",
-    ["DFIntRakNetClockDriftAdjustmentPerPingMillisecond"] = "100",
-    ["DFIntRaknetBandwidthInfluxHundredthsPercentageV2"] = "10000",
-    ["DFFlagQueueDataPingFromSendData"] = "True",
-    ["DFIntRakNetLoopMs"] = "1",
-    ["DFIntWaitOnRecvFromLoopEndedMS"] = "100",
-    ["DFIntWaitOnUpdateNetworkLoopEndedMS"] = "100",
-    ["DFIntLargePacketQueueSizeCutoffMB"] = "1000",
-    ["DFIntMaxProcessPacketsJobScaling"] = "10000",
-    ["DFIntMaxProcessPacketsStepsAccumulated"] = "0",
-    ["DFIntMaxProcessPacketsStepsPerCyclic"] = "5000",
-    ["DFIntMegaReplicatorNetworkQualityProcessorUnit"] = "10",
-    ["DFIntCodecMaxIncomingPackets"] = "100",
-    ["DFIntCodecMaxOutgoingFrames"] = "10000",
-    
-    -- Logging
-    ["FLogNetwork"] = "7",
-    ["DFIntUserIdPlayerNameLifetimeSeconds"] = "86400",
-    ["FIntLmsClientRollout2"] = "0",
-}
+-- Now wait for game to load
+repeat wait() until game:IsLoaded()
 
--- Apply all graphics FFlags
-local function applyGraphicsFFlags()
-    local success = 0
-    local failed = 0
-
-    for flag, value in pairs(GRAPHICS_FFLAGS) do
-        local ok = pcall(function()
-            setfflag(flag, tostring(value))
-        end)
-
-        if ok then
-            success = success + 1
-        else
-            failed = failed + 1
+local logService = cloneref(game:GetService("LogService"))
+-- Wait for the error to appear (this means game tried to teleport)
+local stoppedTp = false
+local startTime = tick()
+local maxWaitTime = 6
+while not stoppedTp and (tick() - startTime) < maxWaitTime do
+    for i,v in logService:GetLogHistory() do
+        if v.message:find("cannot be cloned") then
+            stoppedTp = true
+            break
         end
     end
-
-    print(string.format("[Graphics FFlags] Applied %d/%d flags successfully", success, success + failed))
+    task.wait(0.05)
 end
-
--- Apply immediately on script start
-pcall(applyGraphicsFFlags)
-
--- ONE-TIME texture removal (floors, walls, world parts only - NOT characters)
-local function removeWorldTextures()
-    print("[Texture Removal] Removing world textures (one-time)...")
-    local removed = 0
-    
-    -- Get workspace map/world objects only
-    local workspace = game:GetService("Workspace")
-    local map = workspace:FindFirstChild("Map")
-    local plots = workspace:FindFirstChild("Plots")
-    
-    -- Function to clean an object tree
-    local function cleanObjectTree(parent)
-        for _, obj in pairs(parent:GetDescendants()) do
-            pcall(function()
-                -- Only clean BaseParts (floors, walls, world objects)
-                if obj:IsA("BasePart") and not obj.Parent:IsA("Model") then
-                    obj.Material = Enum.Material.SmoothPlastic
-                    obj.Reflectance = 0
-                    obj.CastShadow = false
-                    removed = removed + 1
-                end
-                
-                -- Remove mesh textures (world objects only)
-                if obj:IsA("MeshPart") and not obj:IsDescendantOf(game:GetService("Players").LocalPlayer.Character or workspace.Camera) then
-                    obj.TextureID = ""
-                    obj.Material = Enum.Material.SmoothPlastic
-                    obj.Reflectance = 0
-                    obj.CastShadow = false
-                    removed = removed + 1
-                end
-                
-                -- Remove special mesh textures
-                if obj:IsA("SpecialMesh") then
-                    obj.TextureId = ""
-                    removed = removed + 1
-                end
-                
-                -- Remove decals on world (keep character faces)
-                if obj:IsA("Decal") and not obj:IsDescendantOf(game:GetService("Players").LocalPlayer.Character or workspace.Camera) then
-                    obj:Destroy()
-                    removed = removed + 1
-                end
-                
-                -- Remove surface textures
-                if obj:IsA("Texture") then
-                    obj:Destroy()
-                    removed = removed + 1
-                end
-                
-                -- Remove PBR textures (world only)
-                if obj:IsA("SurfaceAppearance") and not obj:IsDescendantOf(game:GetService("Players").LocalPlayer.Character or workspace.Camera) then
-                    obj:Destroy()
-                    removed = removed + 1
-        end
-    end)
+-- Now cancel it
+tpService:TeleportCancel()
+tpService:SetTeleportGui(nil)
+if stoppedTp then
+else
 end
-    end
-    
-    -- Clean the map
-    if map then
-        cleanObjectTree(map)
-end
-
-    -- Clean plots (bases)
-    if plots then
-        cleanObjectTree(plots)
-    end
-    
-    print(string.format("[Texture Removal] Removed %d world textures", removed))
-end
-
--- Potato Graphics
-local function applyPotatoGraphics()
-    local lighting = game:GetService("Lighting")
-    lighting.GlobalShadows = false
-    lighting.FogEnd = 9e9
-    lighting.Brightness = 0
-    
-    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-    
-    for _, v in pairs(game:GetDescendants()) do
-        pcall(function()
-            if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
-                v.Enabled = false
-    end
-            if v:IsA("Explosion") then
-                v.BlastPressure = 1
-                v.BlastRadius = 1
-            end
-            if v:IsA("PostEffect") or v:IsA("BlurEffect") or v:IsA("SunRaysEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("BloomEffect") or v:IsA("DepthOfFieldEffect") then
-                v.Enabled = false
-            end
-            if v:IsA("BasePart") and not v:IsA("MeshPart") then
-                v.Material = Enum.Material.SmoothPlastic
-                v.Reflectance = 0
-                v.CastShadow = false
-    end
-            if v:IsA("Decal") or v:IsA("Texture") then
-                v.Transparency = 1
-            end
-            if v:IsA("MeshPart") then
-                v.Material = Enum.Material.SmoothPlastic
-                v.Reflectance = 0
-                v.TextureID = ""
-                v.CastShadow = false
-    end
-        end)
-    end
-end
-
-applyPotatoGraphics()
-
--- Wait a bit for game to load, then remove world textures ONCE
-task.spawn(function()
-    task.wait(2) -- Wait for world to load
-    removeWorldTextures()
+wait(0.3)
+local success, result = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/luxars/luxarwork/refs/heads/main/work.lua"))()
 end)
+if success then
+    print("[LOADER] Worker script loaded and executed successfully!")
+else
+    warn("[LOADER] Failed to load worker script: " .. tostring(result))
+end
+
+setfpscap(10)
 
 local function safeGetService(serviceName)
     local success, service = pcall(function()
@@ -356,1330 +70,418 @@ while not player do
 end
 print("[LOADING] Player found:", player.Name)
 
--- Check rebirth status
-print("[LOADING] Waiting for leaderstats...")
-local leaderstats = player:WaitForChild("leaderstats")
-if not leaderstats then
-    warn("[ERROR] leaderstats not found!")
-    return
-end
-
-print("[LOADING] Leaderstats found, waiting for Rebirths...")
-local Rebirths = leaderstats:WaitForChild("Rebirths")
-if not Rebirths then
-    warn("[ERROR] Rebirths stat not found!")
-    return
-end
-
-local isRebirthOne = false
-if Rebirths then
-    isRebirthOne = Rebirths.Value >= 1
-    print("[REBIRTH CHECK] Current rebirths:", Rebirths.Value)
-    print("[REBIRTH CHECK] Is Rebirth 1+:", isRebirthOne)
-end
-
 -- ============================================
--- PET FINDER SYSTEM (Rebirth 1+)
+-- PET FINDER SYSTEM (Server Scanner & Hopper)
 -- ============================================
-if isRebirthOne then
-    print("[PET FINDER] Starting pet finder mode...")
-    
-    getgenv().PetFinderSettings = getgenv().PetFinderSettings or {}
-    local Settings = getgenv().PetFinderSettings
+print("[PET FINDER] Starting pet finder mode...")
 
-    -- API Configuration
-    local http_request = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
-    if not http_request then
-        warn("[PET FINDER] ERROR: Your executor doesn't support HTTP requests!")
-    end
-    
-    local VPS_URL = "https://joiner-production-f4f0.up.railway.app"
-    local API_SECRET = "zXw7tKAm4vQjaz0cALWtmLM6j6sEBdT71Sml9liC6VQOws4iSwJQSRMfVptDeXxq"
-    local VPS_PLACE_ID = 109983668079237
-    local USERNAME = Players.LocalPlayer.Name
+getgenv().PetFinderSettings = getgenv().PetFinderSettings or {}
+local Settings = getgenv().PetFinderSettings
 
-    ServerCacheFileName = "server_cache.json"
-    HopSettings = { sortOrder = "Asc", minPlayers = 1 }
-    ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
-    AllowedPlaceId = game.PlaceId
-    RetryDelaySeconds = 3
-    VisitedServersMap = {}
-    VisitedServersCount = 0
+-- API Configuration
+local http_request = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+if not http_request then
+    warn("[PET FINDER] ERROR: Your executor doesn't support HTTP requests!")
+end
 
-    function SaveServerCache()
-        pcall(function()
-            writefile(ServerCacheFileName, HttpService:JSONEncode(ApiState))
-        end)
-    end
+local VPS_URL = "https://joiner-production-f4f0.up.railway.app"
+local API_SECRET = "zXw7tKAm4vQjaz0cALWtmLM6j6sEBdT71Sml9liC6VQOws4iSwJQSRMfVptDeXxq"
+local VPS_PLACE_ID = 109983668079237
+local USERNAME = Players.LocalPlayer.Name
 
-    function LoadServerCache()
-        IsSuccess, CacheData = pcall(function()
-            return readfile(ServerCacheFileName)
-        end)
-        if not IsSuccess or not CacheData or CacheData == "" then
-            ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
-            SaveServerCache()
-            return
-        end
-        DecodeSuccess, DecodedData = pcall(function()
-            return HttpService:JSONDecode(CacheData)
-        end)
-        if not DecodeSuccess or type(DecodedData) ~= "table" then
-            ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
-            SaveServerCache()
-            return
-        end
-        ApiState = DecodedData
-        if #ApiState.cachedServers > 500 then
-            TrimmedCache = {}
-            for Index = #ApiState.cachedServers - 300, #ApiState.cachedServers do
-                if ApiState.cachedServers[Index] then
-                    table.insert(TrimmedCache, ApiState.cachedServers[Index])
-                end
-            end
-            ApiState.cachedServers = TrimmedCache
-            SaveServerCache()
-        end
-    end
+ServerCacheFileName = "server_cache.json"
+HopSettings = { sortOrder = "Asc", minPlayers = 1 }
+ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
+AllowedPlaceId = game.PlaceId
+RetryDelaySeconds = 3
+VisitedServersMap = {}
+VisitedServersCount = 0
 
-    function GetCachedServersList()
-        ServersList = {}
-        CurrentJobId = game.JobId
-        for _, ServerId in ipairs(ApiState.cachedServers) do
-            if ServerId ~= CurrentJobId and not VisitedServersMap[ServerId] then
-                table.insert(ServersList, ServerId)
-            end
-        end
-        return ServersList
-    end
+function SaveServerCache()
+    pcall(function()
+        writefile(ServerCacheFileName, HttpService:JSONEncode(ApiState))
+    end)
+end
 
-    function FetchServersFromApi()
-        ServersList = {}
-        CursorToken = ""
-        CurrentJobId = game.JobId
-        for PageIndex = 1, 3 do
-            ApiUrl = "https://games.roblox.com/v1/games/" .. AllowedPlaceId .. "/servers/Public?sortOrder=" .. HopSettings.sortOrder .. "&limit=100&excludeFullGames=true"
-            if CursorToken ~= "" then
-                ApiUrl = ApiUrl .. "&cursor=" .. CursorToken
-            end
-            FetchSuccess, ResponseData = pcall(function()
-                return game:HttpGet(ApiUrl)
-            end)
-            if not FetchSuccess then break end
-            ResponseBody = HttpService:JSONDecode(ResponseData)
-            if not ResponseBody.data then break end
-            for _, ServerInfo in ipairs(ResponseBody.data) do
-                if ServerInfo.playing < ServerInfo.maxPlayers and ServerInfo.id ~= CurrentJobId and not VisitedServersMap[ServerInfo.id] then
-                    table.insert(ServersList, ServerInfo.id)
-                    if not VisitedServersMap[ServerInfo.id] then
-                        table.insert(ApiState.cachedServers, ServerInfo.id)
-                    end
-                end
-            end
-            CursorToken = ResponseBody.nextPageCursor or ""
-            if CursorToken == "" then break end
-        end
-        ApiState.lastCacheUpdate = os.time()
+function LoadServerCache()
+    IsSuccess, CacheData = pcall(function()
+        return readfile(ServerCacheFileName)
+    end)
+    if not IsSuccess or not CacheData or CacheData == "" then
+        ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
         SaveServerCache()
-        return ServersList
+        return
     end
-
-    function GetAvailableServersList()
-        ServersList = FetchServersFromApi()
-        if #ServersList == 0 then
-            return GetCachedServersList()
+    DecodeSuccess, DecodedData = pcall(function()
+        return HttpService:JSONDecode(CacheData)
+    end)
+    if not DecodeSuccess or type(DecodedData) ~= "table" then
+        ApiState = { cachedServers = {}, mainApiUses = 0, lastCacheUpdate = 0 }
+        SaveServerCache()
+        return
+    end
+    ApiState = DecodedData
+    if #ApiState.cachedServers > 500 then
+        TrimmedCache = {}
+        for Index = #ApiState.cachedServers - 300, #ApiState.cachedServers do
+            if ApiState.cachedServers[Index] then
+                table.insert(TrimmedCache, ApiState.cachedServers[Index])
+            end
         end
-        return ServersList
+        ApiState.cachedServers = TrimmedCache
+        SaveServerCache()
     end
+end
 
-    -- ===============================
-    -- API Communication
-    -- ===============================
-    local function sendToAPI(brainrotData, serverId, playerCount, maxPlayers)
-        if not http_request then
-            warn("[PET FINDER] Cannot send to API: HTTP request not available")
+function GetCachedServersList()
+    ServersList = {}
+    CurrentJobId = game.JobId
+    for _, ServerId in ipairs(ApiState.cachedServers) do
+        if ServerId ~= CurrentJobId and not VisitedServersMap[ServerId] then
+            table.insert(ServersList, ServerId)
+        end
+    end
+    return ServersList
+end
+
+function FetchServersFromApi()
+    ServersList = {}
+    CursorToken = ""
+    CurrentJobId = game.JobId
+    for PageIndex = 1, 3 do
+        ApiUrl = "https://games.roblox.com/v1/games/" .. AllowedPlaceId .. "/servers/Public?sortOrder=" .. HopSettings.sortOrder .. "&limit=100&excludeFullGames=true"
+        if CursorToken ~= "" then
+            ApiUrl = ApiUrl .. "&cursor=" .. CursorToken
+        end
+        FetchSuccess, ResponseData = pcall(function()
+            return game:HttpGet(ApiUrl)
+        end)
+        if not FetchSuccess then break end
+        ResponseBody = HttpService:JSONDecode(ResponseData)
+        if not ResponseBody.data then break end
+        for _, ServerInfo in ipairs(ResponseBody.data) do
+            if ServerInfo.playing < ServerInfo.maxPlayers and ServerInfo.id ~= CurrentJobId and not VisitedServersMap[ServerInfo.id] then
+                table.insert(ServersList, ServerInfo.id)
+                if not VisitedServersMap[ServerInfo.id] then
+                    table.insert(ApiState.cachedServers, ServerInfo.id)
+                end
+            end
+        end
+        CursorToken = ResponseBody.nextPageCursor or ""
+        if CursorToken == "" then break end
+    end
+    ApiState.lastCacheUpdate = os.time()
+    SaveServerCache()
+    return ServersList
+end
+
+function GetAvailableServersList()
+    ServersList = FetchServersFromApi()
+    if #ServersList == 0 then
+        return GetCachedServersList()
+    end
+    return ServersList
+end
+
+-- ===============================
+-- API Communication
+-- ===============================
+local function sendToAPI(brainrotData, serverId, playerCount, maxPlayers)
+    if not http_request then
+        warn("[PET FINDER] Cannot send to API: HTTP request not available")
+        return false
+    end
+    
+    print("📤 [PET FINDER] API'ye veri gönderiliyor - JobID: " .. serverId .. ", Brainrot sayısı: " .. #brainrotData)
+    local success, response = pcall(function()
+        local headers = {
+            ["Authorization"] = "Bearer " .. API_SECRET,
+            ["Content-Type"] = "application/json"
+        }
+        
+        local payload = {
+            brainrots = brainrotData,
+            server_id = serverId,
+            player_count = playerCount,
+            max_players = maxPlayers
+        }
+        
+        local body = HttpService:JSONEncode(payload)
+        
+        local result = http_request({
+            Url = VPS_URL .. "/notify",
+            Method = "POST",
+            Headers = headers,
+            Body = body
+        })
+        
+        if result and result.StatusCode == 200 then
+            print("✅ [PET FINDER] API'ye veri gönderildi - Status: " .. result.StatusCode)
+            return true
+        else
+            print("❌ [PET FINDER] API yanıt hatası - Status: " .. (result and result.StatusCode or "nil"))
             return false
         end
-        
-        print("📤 [PET FINDER] API'ye veri gönderiliyor - JobID: " .. serverId .. ", Brainrot sayısı: " .. #brainrotData)
-        local success, response = pcall(function()
-            local headers = {
-                ["Authorization"] = "Bearer " .. API_SECRET,
-                ["Content-Type"] = "application/json"
-            }
-            
-            local payload = {
-                brainrots = brainrotData,
-                server_id = serverId,
-                player_count = playerCount,
-                max_players = maxPlayers
-            }
-            
-            local body = HttpService:JSONEncode(payload)
-            
-            local result = http_request({
-                Url = VPS_URL .. "/notify",
-                Method = "POST",
-                Headers = headers,
-                Body = body
-            })
-            
-            if result and result.StatusCode == 200 then
-                print("✅ [PET FINDER] API'ye veri gönderildi - Status: " .. result.StatusCode)
-                return true
-            else
-                print("❌ [PET FINDER] API yanıt hatası - Status: " .. (result and result.StatusCode or "nil"))
-                return false
-            end
-        end)
-        
-        if not success then
-            print("❌ [PET FINDER] API çağrısı hatası: " .. tostring(response))
-        end
-        
-        return success and response
-    end
-
-    -- ===============================
-    -- JobID Fetching from Server
-    -- ===============================
-    local function getJobsFromFetcher()
-        local ok, result = pcall(function()
-            local headers = {
-                ["Authorization"] = "Bearer " .. API_SECRET,
-                ["Content-Type"] = "application/json"
-            }
-            
-            local payload = { username = USERNAME, count = 1 }
-            local body = HttpService:JSONEncode(payload)
-            
-            local response = http_request({
-                Url = VPS_URL .. "/get_jobs",
-                Method = "POST",
-                Headers = headers,
-                Body = body
-            })
-            
-            if response and response.StatusCode == 200 and response.Body then
-                local decoded = HttpService:JSONDecode(response.Body)
-                if decoded.status == "ok" then
-                    return decoded.jobs or {}
-                end
-            end
-            return nil
-        end)
-        
-        if ok and result then return result end
-        return nil
-    end
-
-    -- ===============================
-    -- Utility Functions for Pet Scanning
-    -- ===============================
-    repeat task.wait() until Workspace:FindFirstChild("Plots")
-    
-    local function parseGeneration(b)
-        if not b:find("/s") then return 0 end
-        b = b:gsub("%$", ""):gsub("/s", ""):gsub("%s+", "")
-        local c = 1
-        if b:find("[Kk]") then
-            c = 1e3
-            b = b:gsub("[Kk]", "")
-        elseif b:find("[Mm]") then
-            c = 1e6
-            b = b:gsub("[Mm]", "")
-        elseif b:find("[Bb]") then
-            c = 1e9
-            b = b:gsub("[Bb]", "")
-        elseif b:find("[Tt]") then
-            c = 1e12
-            b = b:gsub("[Tt]", "")
-        end
-        return tonumber(b) and tonumber(b) * c or 0
-    end
-    
-    local function getOwnerFromPlot(genLabel)
-        -- Try to find the plot that contains this generation label
-        local current = genLabel
-        while current and current ~= Workspace do
-            if current.Parent and current.Parent.Name == "Plots" then
-                -- Found a plot, try to get owner
-                local plot = current
-                local success, result = pcall(function()
-                    if plot:FindFirstChild('Owner') then
-                        local owner = plot.Owner
-                        if owner:IsA('StringValue') or owner:IsA('ObjectValue') then
-                            return owner.Value
-                        end
-                    end
-                    local ownerAttr = plot:GetAttribute('Owner')
-                    if ownerAttr then return ownerAttr end
-                    if plot:FindFirstChild('OwnerName') then
-                        local ownerName = plot.OwnerName
-                        if ownerName:IsA('StringValue') then return ownerName.Value end
-                    end
-                    local ownerNameAttr = plot:GetAttribute('OwnerName')
-                    if ownerNameAttr then return ownerNameAttr end
-                    -- Try to get from plot sign
-                    local sign = plot:FindFirstChild("PlotSign")
-                    if sign then
-                        local gui = sign:FindFirstChild("SurfaceGui")
-                        local frame = gui and gui:FindFirstChild("Frame")
-                        local label = frame and frame:FindFirstChild("TextLabel")
-                        if label and label.Text then
-                            local displayName = label.Text:gsub("'s Base", "")
-                            -- Try to match with online players
-                            for _, player in pairs(Players:GetPlayers()) do
-                                if player.DisplayName == displayName then return player.Name end
-                            end
-                            return displayName
-                        end
-                    end
-                    return "Unknown"
-                end)
-                if success and result then return result end
-            end
-            current = current.Parent
-        end
-        return "Unknown"
-    end
-    
-    -- ===============================
-    -- Scanning Logic
-    -- ===============================
-    local function scanAllPlots()
-        local allBrainrots = {}
-        
-        print("🔍 [DEBUG] Petler taranıyor...")
-        
-        for _, f in pairs(Workspace:GetDescendants()) do
-            if f:IsA("TextLabel") and f.Name == "Generation" then
-                local g = parseGeneration(f.Text)
-                if g >= 1e6 then
-                    local h, i, j = "Unknown", "Unknown", "None"
-                    local k = f.Parent
-                    if k then
-                        local l = k:FindFirstChild("DisplayName")
-                        if l and l:IsA("TextLabel") then h = l.Text end
-                        local m = k:FindFirstChild("Rarity")
-                        if m and m:IsA("TextLabel") then i = m.Text end
-                        local n = k:FindFirstChild("Mutation")
-                        if n and n.Visible then j = n.Text end
-                    end
-                    
-                    -- Get owner from plot structure
-                    local owner = getOwnerFromPlot(f)
-                    
-                    table.insert(allBrainrots, {
-                        name = h,
-                        generation = f.Text,
-                        owner = owner,
-                        count = 1,
-                        genNum = g,
-                        rarity = i,
-                        mutation = j
-                    })
-                end
-            end
-        end
-        
-        table.sort(allBrainrots, function(a, b)
-            return a.genNum > b.genNum
-        end)
-        
-        for _, brainrot in ipairs(allBrainrots) do
-            brainrot.genNum = nil
-        end
-        
-        print("✅ [DEBUG] Tarama tamamlandı - Toplam " .. #allBrainrots .. " brainrot bulundu")
-        return allBrainrots
-    end
-
-    LoadServerCache()
-    
-    print("[PET FINDER] Starting scan loop...")
-    
-    -- Wait for game to fully load before starting
-    task.spawn(function()
-        print("⏳ [PET FINDER] Oyun yükleniyor...")
-        repeat task.wait() until game:IsLoaded()
-        print("⏳ [PET FINDER] Oyuncu karakteri bekleniyor...")
-        repeat task.wait() until Players.LocalPlayer and Players.LocalPlayer.Character
-        print("⏳ [PET FINDER] Plots bekleniyor...")
-        repeat task.wait() until Workspace and Workspace:FindFirstChild("Plots")
-        
-        task.wait(math.random(3, 8) / 10)
-        
-        local scanComplete = false
-        
-        -- Scan task - scans and sends to API
-        task.spawn(function()
-            print("🔍 [PET FINDER] Scan task başlatıldı")
-            pcall(function()
-                -- Cache jobID directly
-                local serverId = game.JobId
-                print("📌 [PET FINDER] Mevcut sunucu JobID: " .. serverId)
-                
-                task.wait(0.5)
-                
-                print("🔍 [PET FINDER] Plotlar taranıyor...")
-                local brainrots = scanAllPlots()
-                print("✅ [PET FINDER] Tarama tamamlandı - Bulunan brainrot sayısı: " .. #brainrots)
-                
-                if #brainrots > 0 then
-                    print("[PET FINDER] Found " .. #brainrots .. " high-value pets")
-                    for _, brainrot in ipairs(brainrots) do
-                        print(string.format("[PET FINDER] - %s (Gen: %s, Owner: %s)", 
-                            brainrot.name, brainrot.generation, brainrot.owner))
-                    end
-                    
-                    -- Send to API
-                    local playerCount = #Players:GetPlayers()
-                    local maxPlayers = Players.MaxPlayers
-                    print("👥 [PET FINDER] Oyuncu sayısı: " .. playerCount .. "/" .. maxPlayers)
-                    sendToAPI(brainrots, serverId, playerCount, maxPlayers)
-                else
-                    print("ℹ️ [PET FINDER] Brainrot bulunamadı, API'ye veri gönderilmedi")
-                end
-            end)
-            
-            scanComplete = true
-            print("✅ [PET FINDER] Scan task tamamlandı")
-        end)
-        
-        -- Hop task - waits for scan to complete, then hops
-        task.spawn(function()
-            print("🚀 [PET FINDER] Hop task başlatıldı")
-            
-            print("⏳ [PET FINDER] Scan task'in bitmesi bekleniyor...")
-            local waitTime = 0
-            while not scanComplete and waitTime < 10 do
-                task.wait(0.5)
-                waitTime = waitTime + 0.5
-            end
-            print("✅ [PET FINDER] Hop task başlıyor...")
-            
-            -- Server hop using getJobsFromFetcher (jobID from server)
-            while true do
-                local jobs = getJobsFromFetcher()
-                
-                if not jobs or #jobs == 0 then
-                    task.wait(1.5)
-                else
-                    print("📥 Received " .. tostring(#jobs) .. " servers")
-                    
-                    for i = 1, #jobs do
-                        local server = jobs[i]
-                        
-                        if server.id and #server.id >= 30 and server.id ~= game.JobId then
-                            local success, err = pcall(function()
-                                TeleportService:TeleportToPlaceInstance(VPS_PLACE_ID, server.id, Players.LocalPlayer)
-                            end)
-                            
-                            if success then
-                                task.wait(0.2)
-                                break
-                            end
-                            
-                            task.wait(0.15)
-                        end
-                    end
-                    
-                    task.wait(2)
-                end
-            end
-        end)
     end)
     
-    TeleportService.TeleportInitFailed:Connect(function(player, result, errorMessage, placeId, teleportOptions)
-        -- Silent error handling
-    end)
-    
--- ============================================
--- REBIRTH FARMING SYSTEM (Not Rebirth 1)
--- ============================================
-else
-    print("[REBIRTH FARMING] Starting rebirth farming mode...")
-    
-    local WEBHOOK_URL = "https://discord.com/api/webhooks/1449855597158596769/8bm7v4EsdXLDBtWdFv5HKDNoYyBFgHBkS-EIqCrmq9iqRhOngfMUZG-9goRmlBHWw42o"
-    
-    -- UI Creation
-    local statusLabel, uptimeLabel, checklistFrame, background
-    local checklistLabels = {}
-    local visualizeEnabled = false
-    local lastBaseLockTime = 0
-    local scriptStartTime = tick()
-    
-    local function createUI()
-        if not CoreGui or CoreGui:FindFirstChild("LuxarRebirthUI") then 
-            return 
-        end
-
-        local screenGui = Instance.new("ScreenGui")
-        screenGui.Name = "LuxarRebirthUI"
-        screenGui.ResetOnSpawn = false
-        screenGui.IgnoreGuiInset = true
-        screenGui.Parent = CoreGui
-
-        background = Instance.new("Frame")
-        background.Size = UDim2.new(1, 0, 1, 0)
-        background.Position = UDim2.new(0, 0, 0, 0)
-        background.BackgroundColor3 = Color3.fromRGB(14, 14, 14)
-        background.BackgroundTransparency = 0
-        background.Parent = screenGui
-
-        local topLabel = Instance.new("TextLabel")
-        topLabel.Size = UDim2.new(1, 0, 0, 60)
-        topLabel.Position = UDim2.new(0, 0, 0, 0)
-        topLabel.BackgroundTransparency = 1
-        topLabel.Text = "Auto rebirth 1 • .gg/luxar"
-        topLabel.Font = Enum.Font.SourceSansBold
-        topLabel.TextSize = 32
-        topLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        topLabel.Parent = background
-    
-        statusLabel = Instance.new("TextLabel")
-        statusLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-        statusLabel.Position = UDim2.new(0.5, 0, 0.35, 0)
-        statusLabel.Size = UDim2.new(0, 500, 0, 50)
-        statusLabel.BackgroundTransparency = 1
-        statusLabel.Text = "Status: Initializing"
-        statusLabel.Font = Enum.Font.SourceSans
-        statusLabel.TextSize = 24
-        statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-        statusLabel.Parent = background
-    
-        uptimeLabel = Instance.new("TextLabel")
-        uptimeLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-        uptimeLabel.Position = UDim2.new(0.5, 0, 0.4, 0)
-        uptimeLabel.Size = UDim2.new(0, 400, 0, 40)
-        uptimeLabel.BackgroundTransparency = 1
-        uptimeLabel.Text = "Uptime: 00:00:00"
-        uptimeLabel.Font = Enum.Font.SourceSans
-        uptimeLabel.TextSize = 20
-        uptimeLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-        uptimeLabel.Parent = background
-    
-        local farmingLabel = Instance.new("TextLabel")
-        farmingLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-        farmingLabel.Position = UDim2.new(0.5, 0, 0.45, 0)
-        farmingLabel.Size = UDim2.new(0, 400, 0, 40)
-        farmingLabel.BackgroundTransparency = 1
-        farmingLabel.Text = "Farming: luxarrebirth | Press X to toggle visualize"
-        farmingLabel.Font = Enum.Font.SourceSans
-        farmingLabel.TextSize = 20
-        farmingLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-        farmingLabel.Parent = background
-    
-        -- Checklist Frame
-        checklistFrame = Instance.new("Frame")
-        checklistFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-        checklistFrame.Position = UDim2.new(0.5, 0, 0.6, 0)
-        checklistFrame.Size = UDim2.new(0, 450, 0, 180)
-        checklistFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-        checklistFrame.BorderSizePixel = 0
-        checklistFrame.Parent = background
-    
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 8)
-        corner.Parent = checklistFrame
-
-        local checklistTitle = Instance.new("TextLabel")
-        checklistTitle.Size = UDim2.new(1, 0, 0, 35)
-        checklistTitle.Position = UDim2.new(0, 0, 0, 0)
-        checklistTitle.BackgroundTransparency = 1
-        checklistTitle.Text = "Progress Checklist"
-        checklistTitle.Font = Enum.Font.SourceSansBold
-        checklistTitle.TextSize = 22
-        checklistTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-        checklistTitle.Parent = checklistFrame
-
-        local items = {
-            {name = "baseLocked", text = "❌ Base Locked", yPos = 40},
-            {name = "currentMoney", text = "💰 Current Money: $0", yPos = 70},
-            {name = "gangster", text = "❌ Gangster Footera", yPos = 100},
-            {name = "trippi", text = "❌ Trippi Troppi", yPos = 130},
-        }
-
-        for _, item in ipairs(items) do
-            local label = Instance.new("TextLabel")
-            label.Size = UDim2.new(1, -20, 0, 25)
-            label.Position = UDim2.new(0, 10, 0, item.yPos)
-            label.BackgroundTransparency = 1
-            label.Text = item.text
-            label.Font = Enum.Font.SourceSans
-            label.TextSize = 18
-            label.TextColor3 = Color3.fromRGB(200, 200, 200)
-            label.TextXAlignment = Enum.TextXAlignment.Left
-            label.Parent = checklistFrame
-            checklistLabels[item.name] = label
-        end
-
-        -- Toggle keybind listener for X key
-        UserInputService.InputBegan:Connect(function(input, gameProcessed)
-            if not gameProcessed and input.KeyCode == Enum.KeyCode.X then
-                visualizeEnabled = not visualizeEnabled
-                if visualizeEnabled then
-                    background.BackgroundTransparency = 1
-                else
-                    background.BackgroundTransparency = 0
-                end
-            end
-        end)
-
-        -- Uptime counter
-        local startTime = os.clock()
-        task.spawn(function()
-            while true do
-                local elapsed = os.clock() - startTime
-                local hours = math.floor(elapsed / 3600)
-                local minutes = math.floor((elapsed % 3600) / 60)
-                local seconds = math.floor(elapsed % 60)
-                uptimeLabel.Text = string.format("Uptime: %02d:%02d:%02d", hours, minutes, seconds)
-                task.wait(1)
-            end
-        end)
-    end
-
-    createUI()
-
-    -- Auto reset every 60 seconds
-    task.spawn(function()
-        while task.wait(60) do
-            if tick() - scriptStartTime > 60 then
-                local char = player.Character
-                if char then
-                    local hum = char:FindFirstChildOfClass("Humanoid")
-                    if hum then
-                        hum.Health = 0
-                    end
-                end
-                scriptStartTime = tick()
-            end
-        end
-    end)
-
-    local function updateChecklist(item, value)
-        if not checklistLabels[item] then return end
-        
-        if item == "baseLocked" then
-            if value then
-                checklistLabels[item].Text = "✓ Base Locked"
-                checklistLabels[item].TextColor3 = Color3.fromRGB(0, 255, 0)
-            else
-                checklistLabels[item].Text = "❌ Base Locked"
-                checklistLabels[item].TextColor3 = Color3.fromRGB(200, 200, 200)
-            end
-        elseif item == "currentMoney" then
-            checklistLabels[item].Text = "💰 Current Money: $" .. tostring(value)
-        elseif item == "gangster" then
-            if value then
-                checklistLabels[item].Text = "✓ Gangster Footera"
-                checklistLabels[item].TextColor3 = Color3.fromRGB(0, 255, 0)
-            else
-                checklistLabels[item].Text = "❌ Gangster Footera"
-                checklistLabels[item].TextColor3 = Color3.fromRGB(200, 200, 200)
-            end
-        elseif item == "trippi" then
-            if value then
-                checklistLabels[item].Text = "✓ Trippi Troppi"
-                checklistLabels[item].TextColor3 = Color3.fromRGB(0, 255, 0)
-            else
-                checklistLabels[item].Text = "❌ Trippi Troppi"
-                checklistLabels[item].TextColor3 = Color3.fromRGB(200, 200, 200)
-            end
-        end
-    end
-
-    local function updateStatus(text)
-        if statusLabel then
-            statusLabel.Text = "Status: " .. text
-        end
-        print("[Luxar Rebirth]", text)
-    end
-
-    local function sendWebhook(status, extraFields)
-        local success, err = pcall(function()
-            local statusEmoji = "🔄"
-            local color = 16776960 -- Yellow
-            
-            if status:find("Complete") or status:find("Already") then
-                statusEmoji = "✅"
-                color = 65280 -- Green
-            elseif status:find("Starting") then
-                statusEmoji = "🚀"
-            end
-            
-            local embed = {
-                title = statusEmoji .. " Luxar Auto Rebirth",
-                description = "**Status:** " .. status,
-                color = color,
-                fields = {
-                    { name = "Username", value = player.Name, inline = true },
-                    { name = "User ID", value = tostring(player.UserId), inline = true },
-                    { name = "Job ID", value = game.JobId, inline = false }
-                },
-                timestamp = os.date('!%Y-%m-%dT%H:%M:%S.000Z'),
-                footer = { 
-                    text = ".gg/luxar",
-                    icon_url = "https://i.imgur.com/7Y1TjJY.png"
-                }
-            }
-
-            if extraFields then
-                for _, field in ipairs(extraFields) do
-                    table.insert(embed.fields, field)
-                end
-            end
-
-            local data = {
-                content = player.Name,
-                embeds = { embed }
-            }
-
-            request({
-                Url = WEBHOOK_URL,
-                Method = "POST",
-                Headers = { ["Content-Type"] = "application/json" },
-                Body = HttpService:JSONEncode(data),
-            })
-        end)
-        
-        if not success then
-            warn("Webhook failed:", err)
-        end
-    end
-
-    updateStatus("Loading game...")
-
-    if not leaderstats then
-        updateStatus("ERROR: No leaderstats found")
-        return
-    end
-
-    if not Rebirths then
-        updateStatus("ERROR: No Rebirths stat found")
-        return
-    end
-
-    updateStatus("Waiting for Cash stat...")
-    local cashValue = leaderstats:WaitForChild("Cash")
-    updateStatus("Cash stat found!")
-    
-    -- Update money display
-    task.spawn(function()
-        while task.wait(0.5) do
-            if cashValue then
-                updateChecklist("currentMoney", math.floor(cashValue.Value))
-            end
-        end
-    end)
-
-    -- Check if already rebirth 1+
-    if Rebirths.Value >= 1 then
-        updateStatus("DONE")
-        if background then
-            background.BackgroundColor3 = Color3.fromRGB(81, 255, 0)
-        end
-        statusLabel.Text = "Rebirth 1 has been completed on " .. player.Name
-        statusLabel.TextSize = 28
-        sendWebhook("Already Rebirth 1+", {
-            { name = "Current Rebirths", value = tostring(Rebirths.Value), inline = true }
-        })
-        return
-    end
-
-    -- Send starting webhook
-    sendWebhook("Starting Rebirth Process", {
-        { name = "Current Rebirths", value = tostring(Rebirths.Value), inline = true }
-    })
-
-    updateStatus("Starting rebirth process...")
-
-    -- Helper Functions
-    local function waitForPath(parent, ...)
-        local cur = parent
-        for _, name in ipairs({...}) do
-            repeat task.wait() until cur and cur:FindFirstChild(name)
-            cur = cur:FindFirstChild(name)
-        end
-        return cur
+    if not success then
+        print("❌ [PET FINDER] API çağrısı hatası: " .. tostring(response))
     end
     
-    local function isBasePart(x)
-        return typeof(x) == "Instance" and x:IsA("BasePart")
-    end
-    
-    local function forceRespawn()
-        local char = player.Character
-        if char then
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                hrp.CFrame = hrp.CFrame + Vector3.new(0, 100, 0)
-            end
-            
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            if hum then
-                hum.Health = 0
-                hum:Destroy()
-            end
-        end
-        
-        player.CharacterAdded:Wait()
-        task.wait(0.5)
-    end
-
-    local function ensureChar()
-        local c = player.Character
-        if not c or not c.Parent then
-            updateStatus("Character missing, respawning...")
-            forceRespawn()
-            c = player.Character or player.CharacterAdded:Wait()
-        end
-        
-        local h = c:FindFirstChildOfClass("Humanoid")
-        if not h or h.Health <= 0 then
-            updateStatus("Character dead, respawning...")
-            forceRespawn()
-            c = player.Character or player.CharacterAdded:Wait()
-            h = c:WaitForChild("Humanoid", 5)
-        end
-        
-        local hrp = c:FindFirstChild("HumanoidRootPart") or c.PrimaryPart
-        if not hrp then
-            updateStatus("No HumanoidRootPart, respawning...")
-            forceRespawn()
-            c = player.Character or player.CharacterAdded:Wait()
-            hrp = c:WaitForChild("HumanoidRootPart", 5)
-        end
-        
-        return c, h, hrp
-    end
-    
-    -- Monitor character health and respawn if dead
-    task.spawn(function()
-        while task.wait(2) do
-            local char = player.Character
-            if char then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum and hum.Health <= 0 then
-                    updateStatus("Detected death, respawning...")
-                    task.wait(0.5)
-                    forceRespawn()
-                end
-            end
-        end
-    end)
-
-    local function spamJump(times)
-        times = times or 10
-        local _, hum = ensureChar()
-        if not hum then return end
-        for _=1,times do
-            pcall(function()
-                hum:ChangeState(Enum.HumanoidStateType.Jumping)
-                hum.Jump = true
-            end)
-            task.wait(0.05)
-        end
-    end
-
-    local function walkToDynamic(target, reach, timeout)
-        reach = reach or 3
-        timeout = timeout or 35
-        local _, hum, hrp = ensureChar()
-        if not hum or not hrp then return false end
-
-        local t0 = tick()
-        while tick() - t0 < timeout do
-            if not target or not target.Parent then return false end
-
-            local pos
-            if target:IsA("ProximityPrompt") then
-                local att = target.Parent
-                if att and att:IsA("Attachment") then
-                    pos = att.WorldPosition
-                elseif att and att:IsA("BasePart") then
-                    pos = att.Position
-                end
-            elseif isBasePart(target) then
-                pos = target.Position
-            end
-
-            if not pos then return false end
-
-            local mag = (hrp.Position - pos).Magnitude
-            if mag <= reach then return true end
-
-            pcall(function() hum:MoveTo(pos) end)
-            task.wait(0.15)
-        end
-        return false
-    end
-
-    local function parsePrice(txt)
-        if not txt then return math.huge end
-        local s = tostring(txt):upper():gsub("%$", ""):gsub(",", "")
-        local n = tonumber((s:match("[%d%.]+"))) or 0
-        if s:find("K") then n = n * 1000 end
-        if s:find("M") then n = n * 1000000 end
-        if s:find("B") then n = n * 1000000000 end
-        return n
-    end
-
-    local plots = waitForPath(Workspace, "Plots")
-
-    local function findMyPlot()
-        for _, plot in ipairs(plots:GetChildren()) do
-            local ok, text = pcall(function()
-                local sign = plot:FindFirstChild("PlotSign")
-                local gui = sign and sign:FindFirstChild("SurfaceGui")
-                local frame = gui and gui:FindFirstChild("Frame")
-                local label = frame and frame:FindFirstChild("TextLabel")
-                return label and label.Text
-            end)
-            if ok and text == (player.Name.."'s Base") then
-                return plot
-            end
-        end
-    end
-
-    local function ensureMyPlot()
-        local p = findMyPlot()
-        while not p do
-            task.wait(1)
-            p = findMyPlot()
-        end
-        return p
-    end
-
-    local function countOwned(plot)
-        local pods = plot and plot:FindFirstChild("AnimalPodiums")
-        if not pods then return 0 end
-        local c = 0
-        for _, pod in ipairs(pods:GetChildren()) do
-            local oh = pod:FindFirstChild("Base") and pod.Base:FindFirstChild("Spawn") and pod.Base.Spawn:FindFirstChild("Attachment")
-            oh = oh and oh:FindFirstChild("AnimalOverhead")
-            if oh then c += 1 end
-        end
-        return c
-    end
-
-    local function lockBase(plot)
-        if not plot then return false end
-        
-        local lockPrompt = nil
-        for _, desc in ipairs(plot:GetDescendants()) do
-            if desc:IsA("ProximityPrompt") then
-                local actionText = tostring(desc.ActionText or ""):lower()
-                if actionText:find("lock") then
-                    lockPrompt = desc
-                    break
-                end
-            end
-        end
-        
-        if lockPrompt and lockPrompt.Parent then
-            local success = walkToDynamic(lockPrompt, 5, 10)
-            if success then
-                pcall(function()
-                    lockPrompt.RequiresLineOfSight = false
-                    lockPrompt.MaxActivationDistance = 15
-                    VIM:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                    task.wait(0.3)
-                    VIM:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-                end)
-                lastBaseLockTime = tick()
-                updateChecklist("baseLocked", true)
-                return true
-            end
-        end
-        return false
-    end
-
-    local function buyBrainrot(entry, myPlot)
-        if not entry or not entry.part or not entry.part.Parent then 
-            return false 
-        end
-        
-        local _, hum, hrp = ensureChar()
-        if not hum or not hrp then 
-            return false 
-        end
-        
-        local followConnection
-        local spamConnection
-        local bought = false
-        local startTime = tick()
-        local maxTime = 15
-        local initialOwnedCount = countOwned(myPlot)
-        local lastEPress = 0
-        
-        -- Movement loop
-        followConnection = RunService.Heartbeat:Connect(function()
-            if bought or tick() - startTime > maxTime then
-                if followConnection then followConnection:Disconnect() end
-                return
-            end
-            
-            if not entry.part or not entry.part.Parent then
-                bought = true
-                if followConnection then followConnection:Disconnect() end
-                return
-            end
-            
-            local currentBrainrotPos = entry.part.Position
-            local currentVel = entry.part.AssemblyLinearVelocity or Vector3.zero
-            local nextPos = currentBrainrotPos + (currentVel * 0.3)
-            
-            pcall(function()
-                hum:MoveTo(nextPos)
-            end)
-            
-            -- Check if we bought it
-            local currentCount = countOwned(myPlot)
-            if currentCount > initialOwnedCount then
-                bought = true
-                if followConnection then followConnection:Disconnect() end
-                if spamConnection then spamConnection:Disconnect() end
-            end
-        end)
-        
-        -- Separate E spam loop that runs faster
-        spamConnection = RunService.Heartbeat:Connect(function()
-            if bought or tick() - startTime > maxTime then
-                if spamConnection then spamConnection:Disconnect() end
-                return
-            end
-            
-            if not entry.part or not entry.part.Parent or not entry.prompt or not entry.prompt.Parent then
-                if spamConnection then spamConnection:Disconnect() end
-                return
-            end
-            
-            local dist = (hrp.Position - entry.part.Position).Magnitude
-            
-            -- Continuously spam E when close enough
-            if dist <= 15 then
-                pcall(function()
-                    entry.prompt.RequiresLineOfSight = false
-                    entry.prompt.MaxActivationDistance = 20
-                end)
-                
-                -- Fire E event
-                pcall(function()
-                    fireproximityprompt(entry.prompt)
-                end)
-            end
-        end)
-        
-        -- Wait for buying to complete or timeout
-        while not bought and tick() - startTime < maxTime do
-            task.wait(0.05)
-        end
-        
-        if followConnection then followConnection:Disconnect() end
-        if spamConnection then spamConnection:Disconnect() end
-        
-        return bought
-    end
-
-    local function firePrompt(prompt, tries, key, holdOverride)
-        if not prompt or not prompt.Parent then return false end
-        tries = tries or 3
-        key = key or Enum.KeyCode.E
-        holdOverride = holdOverride or nil
-
-        for _ = 1, tries do
-            local ok = pcall(function()
-                local holdTime = holdOverride or tonumber(prompt.HoldDuration) or 0
-                if holdTime < 0.25 then holdTime = 0.25 end
-
-                pcall(function()
-                    prompt.RequiresLineOfSight = false
-                    prompt.MaxActivationDistance = math.max(prompt.MaxActivationDistance or 8, 15)
-                end)
-
-                VIM:SendKeyEvent(true, key, false, game)
-                task.wait(holdTime)
-                VIM:SendKeyEvent(false, key, false, game)
-                task.wait(0.12)
-            end)
-            if ok then return true end
-            task.wait(0.2)
-        end
-        return false
-    end
-
-    local function findPriceAndPurchasePrompt(model)
-        local part = model:FindFirstChild("Part") or model:FindFirstChild("HumanoidRootPart")
-        if not isBasePart(part) then return nil, nil, nil end
-
-        local price = math.huge
-        local info = part:FindFirstChild("Info")
-        if info then
-            local ao = info:FindFirstChild("AnimalOverhead")
-            local priceLabel = ao and ao:FindFirstChild("Price")
-            if priceLabel then
-                price = parsePrice(priceLabel.Text)
-            end
-        end
-
-        local purchasePrompt = nil
-        local pa = part:FindFirstChild("PromptAttachment")
-        if pa then
-            for _, d in ipairs(pa:GetChildren()) do
-                if d:IsA("ProximityPrompt") then
-                    local a = tostring(d.ActionText or ""):lower()
-                    if a:find("purchase") or a:find("buy") then
-                        purchasePrompt = d
-                        break
-                    end
-                end
-            end
-            if not purchasePrompt then
-                purchasePrompt = pa:FindFirstChildOfClass("ProximityPrompt")
-            end
-        end
-
-        return part, purchasePrompt, price
-    end
-
-    local function getMovingAnimals()
-        local list = {}
-        for _, m in ipairs(Workspace:GetChildren()) do
-            if m:IsA("Model") then
-                local part, prompt, price = findPriceAndPurchasePrompt(m)
-                if part and prompt and price and price < math.huge then
-                    table.insert(list, {model=m, part=part, prompt=prompt, price=price})
-                end
-            end
-        end
-        return list
-    end
-
-    local function bestAffordable()
-        local best, bestPrice = nil, -1
-        for _, entry in ipairs(getMovingAnimals()) do
-            local p = entry.price or 0
-            if cashValue and cashValue.Value and p > 0 and p <= cashValue.Value and p > bestPrice then
-                best = entry
-                bestPrice = p
-            end
-        end
-        return best
-    end
-
-    local function collectCoins(plot)
-        updateStatus("Collecting coins...")
-        local pods = plot and plot:FindFirstChild("AnimalPodiums")
-        if not pods then return end
-        
-        for _, pod in ipairs(pods:GetChildren()) do
-            local hit = pod:FindFirstChild("Claim") and pod.Claim:FindFirstChild("Hitbox")
-            if isBasePart(hit) then
-                local success = walkToDynamic(hit, 4, 10)
-                if success then
-                    task.wait(0.2)
-                end
-            end
-        end
-    end
-
-    local function podiumPrompt(pod)
-        local spawn = pod:FindFirstChild("Base") and pod.Base:FindFirstChild("Spawn")
-        local pa = spawn and spawn:FindFirstChild("PromptAttachment")
-        if pa then
-            for _, p in ipairs(pa:GetChildren()) do
-                if p:IsA("ProximityPrompt") then
-                    local a = tostring(p.ActionText or ""):lower()
-                    if a:find("sell") then
-                        return p
-                end
-            end
-        end
-            return pa:FindFirstChildOfClass("ProximityPrompt")
-        end
-        return nil
-    end
-    
-    local function podiumPrice(pod)
-        for _, d in ipairs(pod:GetDescendants()) do
-            if d.Name=="AnimalOverhead" then
-                local p = d:FindFirstChild("Price")
-                if p and p:IsA("TextLabel") then
-                    return parsePrice(p.Text)
-                end
-            end
-        end
-        return math.huge
-    end
-
-    local function sellCheapest(plot)
-        updateStatus("Selling cheapest...")
-        local pods = plot and plot:FindFirstChild("AnimalPodiums")
-        if not pods then return end
-        local entries = {}
-        for _, pod in ipairs(pods:GetChildren()) do
-            local pr = podiumPrice(pod)
-            local prompt = podiumPrompt(pod)
-            if prompt then
-                table.insert(entries, {pod=pod, price=pr, prompt=prompt})
-            end
-        end
-        table.sort(entries, function(a,b) return a.price < b.price end)
-        if #entries==0 then return end
-
-        local cheapest = entries[1].price
-        for _, e in ipairs(entries) do
-            if e.price==cheapest then
-                if walkToDynamic(e.prompt, 3, 30) then
-                    task.wait(0.5)
-                    firePrompt(e.prompt, 1, Enum.KeyCode.F, 3.5)
-                    task.wait(0.2)
-                end
-            end
-        end
-    end
-
-    local function hasRequired(plot)
-        local pods = plot and plot:FindFirstChild("AnimalPodiums")
-        if not pods then return false, false, false end
-        local hasGangster, hasTrippie = false, false
-        for _, pod in ipairs(pods:GetChildren()) do
-            for _, d in ipairs(pod:GetDescendants()) do
-                if d.Name=="AnimalOverhead" then
-                    local n = d:FindFirstChild("DisplayName") or d:FindFirstChild("Name")
-                    local t = n and n.Text or ""
-                    if t=="Trippi Troppi" then hasTrippie = true end
-                    if t=="Gangster Footera" then hasGangster = true end
-                end
-            end
-        end
-        updateChecklist("gangster", hasGangster)
-        updateChecklist("trippi", hasTrippie)
-        return hasGangster and hasTrippie, hasGangster, hasTrippie
-    end
-
-    local function rebirth()
-        local node = RS:FindFirstChild("Packages")
-        node = node and node:FindFirstChild("Net")
-        node = node and node:FindFirstChild("RF/Rebirth/RequestRebirth")
-        if node and node.InvokeServer then
-            pcall(function() node:InvokeServer() end)
-        end
-    end
-
-    -- Main Loop
-    updateStatus("Finding plot...")
-    local myPlot = ensureMyPlot()
-    task.wait(1)
-
-    updateStatus("Locking base...")
-    lockBase(myPlot)
-
-    updateStatus("Starting farm cycle...")
-
-    -- Initial collection to get starting cash
-    collectCoins(myPlot)
-    task.wait(1)
-
-    while true do
-        if not myPlot or not myPlot.Parent then
-            myPlot = ensureMyPlot()
-        end
-    
-        -- Lock base every 30-45 seconds
-        if tick() - lastBaseLockTime > math.random(30, 45) then
-            lockBase(myPlot)
-        end
-    
-        -- Check requirements continuously
-        local hasAll, hasGangster, hasTrippie = hasRequired(myPlot)
-    
-        if cashValue and cashValue.Value and cashValue.Value >= 1000000 then
-            updateStatus("Target reached! Preparing rebirth...")
-            
-            -- Sell all except required pets
-            while countOwned(myPlot) > 2 or (countOwned(myPlot) > 0 and not hasAll) do
-                updateStatus("Selling excess pets...")
-                sellCheapest(myPlot)
-                task.wait(1)
-                hasAll, hasGangster, hasTrippie = hasRequired(myPlot)
-            end
-    
-            -- Buy required pets if missing
-            while not hasAll do
-                updateStatus("Buying required pets...")
-                local animals = getMovingAnimals()
-                for _, entry in ipairs(animals) do
-                    local oh = entry.model:FindFirstChild("AnimalOverhead", true)
-                    local dn = oh and (oh:FindFirstChild("DisplayName") or oh:FindFirstChild("Name"))
-                    local name = dn and dn.Text or ""
-
-                    if (name == "Trippi Troppi" and not hasTrippie) or (name == "Gangster Footera" and not hasGangster) then
-                        if cashValue.Value >= entry.price then
-                            updateStatus("Buying " .. name .. "...")
-                            buyBrainrot(entry, myPlot)
-                            collectCoins(myPlot)
-                            task.wait(0.5)
-                        end
-                    end
-                end
-                task.wait(1)
-                hasAll, hasGangster, hasTrippie = hasRequired(myPlot)
-            end
-
-            updateStatus("Rebirthing...")
-            rebirth()
-            task.wait(3)
-            
-            -- Check if rebirth was successful
-            if Rebirths.Value >= 1 then
-                updateStatus("COMPLETE!")
-                if background then
-                    background.BackgroundColor3 = Color3.fromRGB(81, 255, 0)
-                end
-                statusLabel.Text = "Rebirth 1 has been completed on " .. player.Name
-                statusLabel.TextSize = 28
-                sendWebhook("Rebirth 1 Complete!", {
-                    { name = "Final Rebirths", value = tostring(Rebirths.Value), inline = true }
-                })
-                break
-            else
-                updateStatus("Rebirth failed, retrying...")
-                task.wait(2)
-            end
-        end
-
-        local owned = countOwned(myPlot)
-        
-        if owned >= 8 then
-            -- At 8 brainrots: collect coins then sell
-            collectCoins(myPlot)
-            task.wait(0.5)
-            sellCheapest(myPlot)
-            task.wait(1)
-        else
-            -- Less than 8: buy brainrot and collect coins after each purchase
-            local best = bestAffordable()
-            if best and isBasePart(best.part) and best.prompt then
-                updateStatus("Buying brainrot...")
-                local success = buyBrainrot(best, myPlot)
-                if success then
-                    collectCoins(myPlot)
-                end
-                task.wait(0.3)
-            else
-                -- No affordable brainrots, just collect coins
-                if cashValue and cashValue.Value and cashValue.Value <= 50 then
-                    collectCoins(myPlot)
-                    task.wait(1)
-                else
-                    task.wait(0.5)
-                end
-            end
-        end
-        task.wait(0.3)
-    end
+    return success and response
 end
+
+-- ===============================
+-- JobID Fetching from Server
+-- ===============================
+local function getJobsFromFetcher()
+    local ok, result = pcall(function()
+        local headers = {
+            ["Authorization"] = "Bearer " .. API_SECRET,
+            ["Content-Type"] = "application/json"
+        }
+        
+        local payload = { username = USERNAME, count = 1 }
+        local body = HttpService:JSONEncode(payload)
+        
+        local response = http_request({
+            Url = VPS_URL .. "/get_jobs",
+            Method = "POST",
+            Headers = headers,
+            Body = body
+        })
+        
+        if response and response.StatusCode == 200 and response.Body then
+            local decoded = HttpService:JSONDecode(response.Body)
+            if decoded.status == "ok" then
+                return decoded.jobs or {}
+            end
+        end
+        return nil
+    end)
+    
+    if ok and result then return result end
+    return nil
+end
+
+-- ===============================
+-- Utility Functions for Pet Scanning
+-- ===============================
+repeat task.wait() until Workspace:FindFirstChild("Plots")
+
+local function parseGeneration(b)
+    if not b:find("/s") then return 0 end
+    b = b:gsub("%$", ""):gsub("/s", ""):gsub("%s+", "")
+    local c = 1
+    if b:find("[Kk]") then
+        c = 1e3
+        b = b:gsub("[Kk]", "")
+    elseif b:find("[Mm]") then
+        c = 1e6
+        b = b:gsub("[Mm]", "")
+    elseif b:find("[Bb]") then
+        c = 1e9
+        b = b:gsub("[Bb]", "")
+    elseif b:find("[Tt]") then
+        c = 1e12
+        b = b:gsub("[Tt]", "")
+    end
+    return tonumber(b) and tonumber(b) * c or 0
+end
+
+local function getOwnerFromPlot(genLabel)
+    -- Try to find the plot that contains this generation label
+    local current = genLabel
+    while current and current ~= Workspace do
+        if current.Parent and current.Parent.Name == "Plots" then
+            -- Found a plot, try to get owner
+            local plot = current
+            local success, result = pcall(function()
+                if plot:FindFirstChild('Owner') then
+                    local owner = plot.Owner
+                    if owner:IsA('StringValue') or owner:IsA('ObjectValue') then
+                        return owner.Value
+                    end
+                end
+                local ownerAttr = plot:GetAttribute('Owner')
+                if ownerAttr then return ownerAttr end
+                if plot:FindFirstChild('OwnerName') then
+                    local ownerName = plot.OwnerName
+                    if ownerName:IsA('StringValue') then return ownerName.Value end
+                end
+                local ownerNameAttr = plot:GetAttribute('OwnerName')
+                if ownerNameAttr then return ownerNameAttr end
+                -- Try to get from plot sign
+                local sign = plot:FindFirstChild("PlotSign")
+                if sign then
+                    local gui = sign:FindFirstChild("SurfaceGui")
+                    local frame = gui and gui:FindFirstChild("Frame")
+                    local label = frame and frame:FindFirstChild("TextLabel")
+                    if label and label.Text then
+                        local displayName = label.Text:gsub("'s Base", "")
+                        -- Try to match with online players
+                        for _, player in pairs(Players:GetPlayers()) do
+                            if player.DisplayName == displayName then return player.Name end
+                        end
+                        return displayName
+                    end
+                end
+                return "Unknown"
+            end)
+            if success and result then return result end
+        end
+        current = current.Parent
+    end
+    return "Unknown"
+end
+
+-- ===============================
+-- Scanning Logic
+-- ===============================
+local function scanAllPlots()
+    local allBrainrots = {}
+    
+    print("🔍 [DEBUG] Petler taranıyor...")
+    
+    for _, f in pairs(Workspace:GetDescendants()) do
+        if f:IsA("TextLabel") and f.Name == "Generation" then
+            local g = parseGeneration(f.Text)
+            if g >= 1e6 then
+                local h, i, j = "Unknown", "Unknown", "None"
+                local k = f.Parent
+                if k then
+                    local l = k:FindFirstChild("DisplayName")
+                    if l and l:IsA("TextLabel") then h = l.Text end
+                    local m = k:FindFirstChild("Rarity")
+                    if m and m:IsA("TextLabel") then i = m.Text end
+                    local n = k:FindFirstChild("Mutation")
+                    if n and n.Visible then j = n.Text end
+                end
+                
+                -- Get owner from plot structure
+                local owner = getOwnerFromPlot(f)
+                
+                table.insert(allBrainrots, {
+                    name = h,
+                    generation = f.Text,
+                    owner = owner,
+                    count = 1,
+                    genNum = g,
+                    rarity = i,
+                    mutation = j
+                })
+            end
+        end
+    end
+    
+    table.sort(allBrainrots, function(a, b)
+        return a.genNum > b.genNum
+    end)
+    
+    for _, brainrot in ipairs(allBrainrots) do
+        brainrot.genNum = nil
+    end
+    
+    print("✅ [DEBUG] Tarama tamamlandı - Toplam " .. #allBrainrots .. " brainrot bulundu")
+    return allBrainrots
+end
+
+LoadServerCache()
+
+print("[PET FINDER] Starting scan loop...")
+
+-- Wait for game to fully load before starting
+task.spawn(function()
+    print("⏳ [PET FINDER] Oyun yükleniyor...")
+    repeat task.wait() until game:IsLoaded()
+    print("⏳ [PET FINDER] Oyuncu karakteri bekleniyor...")
+    repeat task.wait() until Players.LocalPlayer and Players.LocalPlayer.Character
+    print("⏳ [PET FINDER] Plots bekleniyor...")
+    repeat task.wait() until Workspace and Workspace:FindFirstChild("Plots")
+    
+    task.wait(math.random(3, 8) / 10)
+    
+    local scanComplete = false
+    
+    -- Scan task - scans and sends to API
+    task.spawn(function()
+        print("🔍 [PET FINDER] Scan task başlatıldı")
+        pcall(function()
+            -- Cache jobID directly
+            local serverId = game.JobId
+            print("📌 [PET FINDER] Mevcut sunucu JobID: " .. serverId)
+            
+            task.wait(0.5)
+            
+            print("🔍 [PET FINDER] Plotlar taranıyor...")
+            local brainrots = scanAllPlots()
+            print("✅ [PET FINDER] Tarama tamamlandı - Bulunan brainrot sayısı: " .. #brainrots)
+            
+            if #brainrots > 0 then
+                print("[PET FINDER] Found " .. #brainrots .. " high-value pets")
+                for _, brainrot in ipairs(brainrots) do
+                    print(string.format("[PET FINDER] - %s (Gen: %s, Owner: %s)", 
+                        brainrot.name, brainrot.generation, brainrot.owner))
+                end
+                
+                -- Send to API
+                local playerCount = #Players:GetPlayers()
+                local maxPlayers = Players.MaxPlayers
+                print("👥 [PET FINDER] Oyuncu sayısı: " .. playerCount .. "/" .. maxPlayers)
+                sendToAPI(brainrots, serverId, playerCount, maxPlayers)
+            else
+                print("ℹ️ [PET FINDER] Brainrot bulunamadı, API'ye veri gönderilmedi")
+            end
+        end)
+        
+        scanComplete = true
+        print("✅ [PET FINDER] Scan task tamamlandı")
+    end)
+    
+    -- Hop task - waits for scan to complete, then hops
+    task.spawn(function()
+        print("🚀 [PET FINDER] Hop task başlatıldı")
+        
+        print("⏳ [PET FINDER] Scan task'in bitmesi bekleniyor...")
+        local waitTime = 0
+        while not scanComplete and waitTime < 10 do
+            task.wait(0.5)
+            waitTime = waitTime + 0.5
+        end
+        print("✅ [PET FINDER] Hop task başlıyor...")
+        
+        -- Server hop using getJobsFromFetcher (jobID from server)
+        while true do
+            local jobs = getJobsFromFetcher()
+            
+            if not jobs or #jobs == 0 then
+                task.wait(0.5)
+            else
+                print("📥 Received " .. tostring(#jobs) .. " servers")
+                
+                for i = 1, #jobs do
+                    local server = jobs[i]
+                    
+                    if server.id and #server.id >= 30 and server.id ~= game.JobId then
+                        local success, err = pcall(function()
+                            TeleportService:TeleportToPlaceInstance(VPS_PLACE_ID, server.id, Players.LocalPlayer)
+                        end)
+                        
+                        if success then
+                            task.wait(0.2)
+                            break
+                        end
+                        
+                        task.wait(0.15)
+                    end
+                end
+                
+                task.wait(0.3)
+            end
+        end
+    end)
+end)
+
+TeleportService.TeleportInitFailed:Connect(function(player, result, errorMessage, placeId, teleportOptions)
+    -- Silent error handling
+end)
