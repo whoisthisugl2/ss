@@ -1,5 +1,6 @@
--- Teleport Bypass Loader
+-- Teleport Bypass Loader (Optional - comment out if causing issues)
 -- Execute IMMEDIATELY - don't wait for game to load
+--[[
 local tpService = cloneref(game:GetService("TeleportService"))
 tpService:SetTeleportGui(tpService)
 print("✅ [BYPASS] TeleportGui set IMMEDIATELY - bypass active!")
@@ -24,10 +25,8 @@ end
 -- Now cancel it
 tpService:TeleportCancel()
 tpService:SetTeleportGui(nil)
-if stoppedTp then
-else
-end
 wait(0.1)
+--]]
 
 setfpscap(10)
 
@@ -236,6 +235,7 @@ local function getJobsFromFetcher()
         local payload = { username = USERNAME, count = 1 }
         local body = HttpService:JSONEncode(payload)
         
+        print("📡 [PET FINDER] Requesting jobs from API for user: " .. USERNAME)
         local response = http_request({
             Url = VPS_URL .. "/get_jobs",
             Method = "POST",
@@ -246,13 +246,23 @@ local function getJobsFromFetcher()
         if response and response.StatusCode == 200 and response.Body then
             local decoded = HttpService:JSONDecode(response.Body)
             if decoded.status == "ok" then
-                return decoded.jobs or {}
+                local jobs = decoded.jobs or {}
+                print("✅ [PET FINDER] Received " .. tostring(#jobs) .. " jobs from API")
+                return jobs
+            else
+                print("⚠️ [PET FINDER] API returned status: " .. tostring(decoded.status))
             end
+        else
+            print("❌ [PET FINDER] API request failed - Status: " .. tostring(response and response.StatusCode or "nil"))
         end
         return nil
     end)
     
-    if ok and result then return result end
+    if ok and result then 
+        return result 
+    else
+        print("❌ [PET FINDER] getJobsFromFetcher error: " .. tostring(result))
+    end
     return nil
 end
 
@@ -447,28 +457,38 @@ task.spawn(function()
             local jobs = getJobsFromFetcher()
             
             if not jobs or #jobs == 0 then
-                task.wait(0.5)
+                print("⚠️ [PET FINDER] No servers received, waiting...")
+                task.wait(1.5)
             else
-                print("📥 Received " .. tostring(#jobs) .. " servers")
+                print("📥 [PET FINDER] Received " .. tostring(#jobs) .. " servers")
                 
+                local teleported = false
                 for i = 1, #jobs do
                     local server = jobs[i]
                     
                     if server.id and #server.id >= 30 and server.id ~= game.JobId then
+                        print("🚀 [PET FINDER] Attempting to teleport to server: " .. server.id)
                         local success, err = pcall(function()
                             TeleportService:TeleportToPlaceInstance(VPS_PLACE_ID, server.id, Players.LocalPlayer)
                         end)
                         
                         if success then
+                            print("✅ [PET FINDER] Teleport initiated successfully")
+                            teleported = true
                             task.wait(0.2)
                             break
+                        else
+                            print("❌ [PET FINDER] Teleport failed: " .. tostring(err))
+                            task.wait(0.15)
                         end
-                        
-                        task.wait(0.15)
                     end
                 end
                 
-                task.wait(0.3)
+                if not teleported then
+                    print("⚠️ [PET FINDER] No valid server found, retrying...")
+                end
+                
+                task.wait(2)
             end
         end
     end)
