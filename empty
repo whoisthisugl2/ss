@@ -27,15 +27,7 @@ tpService:SetTeleportGui(nil)
 if stoppedTp then
 else
 end
-wait(0.3)
-local success, result = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/luxars/luxarwork/refs/heads/main/work.lua"))()
-end)
-if success then
-    print("[LOADER] Worker script loaded and executed successfully!")
-else
-    warn("[LOADER] Failed to load worker script: " .. tostring(result))
-end
+wait(0.1)
 
 setfpscap(10)
 
